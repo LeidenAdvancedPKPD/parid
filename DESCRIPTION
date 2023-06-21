@@ -1,0 +1,23 @@
+Package: parid
+Title: Calculation of parameter identifiability indicators for nonlinear mixed effects models
+Version: 1.0
+Authors@R: c(person("Martijn", "van Noort", email = "info@lapp.nl", role = c("aut", "cre")), person("LAP&P Consultants BV", role = c("cph")))
+Description: Methods for determining the identifiability of nonlinear mixed effects model parameters, namely: Sensitivity Matrix Method (SMM), Fisher Information Matrix Method (FIMM) and Aliasing. The model is given as a set of differential equations, with specification of observed outputs, parameters and dosing. The methods assess whether the parameters can be identified from the model output, and optionally indicate dependencies between parameters.
+Imports:
+  plyr,
+  MASS,
+  grDevices,
+  deSolve,
+  stats,
+  stringr,
+  Deriv,
+  numDeriv,
+  reshape2,
+  ggnewscale
+Depends:
+  ggplot2
+License: `use_gpl3_license()`
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
