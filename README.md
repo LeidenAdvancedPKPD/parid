@@ -12,7 +12,7 @@ The methods assess whether the parameters can be identified from the model outpu
 The package can be installed using:
 
 ```R
-devtools::install_github("LeidenAdvancedPKPD/parid").
+devtools::install_github("LeidenAdvancedPKPD/parid")
 ```
 
 ## Documentation
