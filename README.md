@@ -12,14 +12,13 @@ The methods assess whether the parameters can be identified from the model outpu
 The package can be installed using:
 
 ```R
-devtools::install_github("XXX/parid")
+devtools::install_github("LeidenAdvancedPKPD/parid").
 ```
 
 ## Documentation
 
-A short introduction to the package can be found in the article section on the [packagedown site](https://XXX.github.io/parid/index.html)
-A worked out example is available in the package (file tests/example.r).
-A showcase can be found [here](https://lapp.nl/lapp-software/parid.html)
+A worked out [example](https://github.com/LeidenAdvancedPKPD/parid/blob/main/tests/example.r) is available in the package.
+A showcase can be found [here](https://lapp.nl/lapp-software/parid.html).
 
 ## License
 
