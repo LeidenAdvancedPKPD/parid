@@ -18,6 +18,11 @@ Checks whether a variational matrix is normalized.
 The check involves checking the validity of the input and the value of its attributes \code{parameterNormalized}
 and \code{outputNormalized}.
 }
+\seealso{
+Other checkers: 
+\code{\link{isNormalizedFim}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{checkers}

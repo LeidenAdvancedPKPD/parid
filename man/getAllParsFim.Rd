@@ -20,6 +20,17 @@ The function displays an error and returns \code{NULL} if \code{fim} is not a va
 \description{
 Gets the values of the parameters used to create a given FIM.
 }
+\seealso{
+Other retrieval functions: 
+\code{\link{[.keepattr}()},
+\code{\link{getAllParsVariations}()},
+\code{\link{getParVecFim}()},
+\code{\link{getParVecVariations}()},
+\code{\link{getParsFim}()},
+\code{\link{getParsVariations}()},
+\code{\link{subFim}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{retrieval functions}

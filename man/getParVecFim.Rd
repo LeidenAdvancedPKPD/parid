@@ -20,6 +20,17 @@ The function displays an error and returns \code{NULL} if \code{fim} is not a va
 Gets the values of the parameters corresponding to the columns of the FIM.
 This is a subset of \code{getAllParsFim} corresponding to the columns present in the FIM.
 }
+\seealso{
+Other retrieval functions: 
+\code{\link{[.keepattr}()},
+\code{\link{getAllParsFim}()},
+\code{\link{getAllParsVariations}()},
+\code{\link{getParVecVariations}()},
+\code{\link{getParsFim}()},
+\code{\link{getParsVariations}()},
+\code{\link{subFim}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{retrieval functions}

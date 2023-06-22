@@ -21,6 +21,13 @@ Simplify the "directions" element of the output of \code{\link{fimIdent}}, by se
 smaller than a threshold (in absolute value) to 0.
 The resulting vectors are scaled to their original norms.
 }
+\seealso{
+Other result modifiers: 
+\code{\link{normalizeFim}()},
+\code{\link{normalizeVariations}()},
+\code{\link{simplifySensitivities}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{result modifiers}

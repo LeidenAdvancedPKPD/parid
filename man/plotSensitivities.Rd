@@ -22,6 +22,14 @@ Generates plots for one or more of the "R", "M" and "L" elements of the output o
 \code{\link{calcSensitivityFromMatrix}}, \code{\link{calcSensitivityFromModel}} or \code{\link{simplifySensitivities}}.
 For "R" or "M", the plot shows the parameter relations, while for "L" it shows the ordering of the parameters.
 }
+\seealso{
+Other plotting and printing: 
+\code{\link{plotAliasing}()},
+\code{\link{plotFim}()},
+\code{\link{plotVariations}()},
+\code{\link{print.keepattr}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{plotting and printing}

@@ -60,6 +60,19 @@ at the given times with respect to the model parameters.
 The times are given in the variational matrix, which contains first and second order derivatives of
 the output with respect to certain parameters, at certain times, for a particular individual.
 }
+\seealso{
+Other calculation functions: 
+\code{\link{calcAliasingScoresFromMatrix}()},
+\code{\link{calcAliasingScoresFromModel}()},
+\code{\link{calcFimFromModel}()},
+\code{\link{calcFirstVariations}()},
+\code{\link{calcSensitivityFromMatrix}()},
+\code{\link{calcSensitivityFromModel}()},
+\code{\link{calcVariationsFim}()},
+\code{\link{calcVariations}()},
+\code{\link{fimIdent}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{calculation functions}

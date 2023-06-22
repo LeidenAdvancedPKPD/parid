@@ -19,6 +19,17 @@ The function displays an error and returns \code{NULL} if \code{df} is not a val
 \description{
 Gets all parameter values that were used to create a given variational matrix.
 }
+\seealso{
+Other retrieval functions: 
+\code{\link{[.keepattr}()},
+\code{\link{getAllParsFim}()},
+\code{\link{getParVecFim}()},
+\code{\link{getParVecVariations}()},
+\code{\link{getParsFim}()},
+\code{\link{getParsVariations}()},
+\code{\link{subFim}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{retrieval functions}

@@ -1,9 +1,11 @@
 # parid: Calculation of parameter identifiability indicators for nonlinear mixed effects models
 
 Methods for determining the identifiability of nonlinear mixed effects model parameters, namely:
-* Sensitivity Matrix Method (SMM)
-* Fisher Information Matrix Method (FIMM)
-* Aliasing
+
+- Sensitivity Matrix Method (SMM)
+- Fisher Information Matrix Method (FIMM)
+- Aliasing
+
 The model is given as a set of differential equations, with specification of observed outputs, parameters and dosing.
 The methods assess whether the parameters can be identified from the model output, and optionally indicate dependencies between parameters.
 

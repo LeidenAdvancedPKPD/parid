@@ -19,6 +19,11 @@ Returns \code{NULL} and prints an error if there was no normalization indicator.
 \description{
 Returns whether the given FIM is normalized, as recorded in its normalization indicators.
 }
+\seealso{
+Other checkers: 
+\code{\link{isNormalizedVariations}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{checkers}

@@ -25,6 +25,13 @@ Simplify the "R", "M" and/or "L" element of the output of \code{\link{calcSensit
 \code{\link{calcSensitivityFromModel}}, by setting all elements smaller than a threshold (in absolute value) to 0.
 The results are renormalized.
 }
+\seealso{
+Other result modifiers: 
+\code{\link{normalizeFim}()},
+\code{\link{normalizeVariations}()},
+\code{\link{simplifyFimIdent}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{result modifiers}

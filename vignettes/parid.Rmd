@@ -1,0 +1,197 @@
+<!-- # parid package: Calculation of parameter identifiability -->
+<!-- #                indicators for nonlinear mixed effects models. -->
+<!-- # -->
+<!-- # Copyright (C) 2023 LAP&P Consultants BV -->
+<!-- # Contact: info@lapp.nl -->
+<!-- #          www.lapp.nl -->
+<!-- #          Archimedesweg 31 -->
+<!-- #          2333 CM Leiden, The Netherlands -->
+<!-- #  -->
+<!-- # This file is part of the parid package. -->
+<!-- # The parid package is free software: you can redistribute it -->
+<!-- # and/or modify it under the terms of the GNU General Public License as -->
+<!-- # published by the Free Software Foundation, either version 3 of the -->
+<!-- # License, or (at your option) any later version. -->
+<!-- # -->
+<!-- # The parid package is distributed in the hope that it will be -->
+<!-- # useful, but WITHOUT ANY WARRANTY; without even the implied warranty -->
+<!-- # of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the -->
+<!-- # GNU General Public License for more details. -->
+<!-- # -->
+<!-- # You should have received a copy of the GNU General Public License -->
+<!-- # along with the parid package. -->
+<!-- # If not, see <https://www.gnu.org/licenses/>.  -->
+
+---
+title: "parid"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{parid}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(parid)
+```
+
+# Introduction
+This is an example showing how to use the parid package.
+The example defines a nonlinear mixed effects model, and analyzes its parameter identifiability using three methods:
+
+- the Sensitivity Matrix Method (SMM)
+- the Fisher Information Matrix Method (FIMM)
+- the Aliasing Method
+
+This example assumes familiarity with mixed effects modeling.
+More details on the methods and on parameter identifiability in general can be found [here](https://lapp.nl/lapp-software/parid.html).
+R code running this same example can be found in the package, at tests/example.R.
+
+# Model definition
+The model is a one-compartmental linear PK model with absorption and a single oral dose.
+The model parameters are clearance (CL), volume (V), the absorption rate constant (Ka) and optionally the bio-availability (F); they are defined in terms of underlying structural and inter-individual parameters.
+In this example, inter-individual variability is included on clearance.
+The output is the concentration, which is modeled with an additive error.
+
+The expected outcome is that this model will not be identifiable because the bio-availability cannot be determined independently from the clearance and volume. If the bio-availability is fixed, then the model should be identifiable.
+
+The next lines of code create four functions defining this model:
+
+- `model`: returns the differential equations describing the time evolution of the model. The input arguments are the time `t`, the current state `y` (i.e., the amounts in the depot and central compartments), and the model parameters `p`.
+- `p`: returns the model parameters as function of the structural parameters `theta` and inter-individual parameters `eta`. The dose is also included here. In general, any covariates could be included. For all parameters except CL, the value is simply the value of the corresponding structural parameter.
+- `init`: returns the initial values of the state variables, as function of the model parameters `p`. In this example, the depot is initialized to the bio-available fraction of the dose, and the central compartment to zero.
+- `output`: returns the model output, that is the concentration (with residual error), as function of the state `y`, the model parameters `p` and the residual error `eps`.
+
+```{r}
+model      <- function(t, y, p) { c(-p[["Ka"]]*y[["x1"]], p[["Ka"]]*y[["x1"]] - p[["CL"]]/p[["V"]] * y[["x2"]]) }
+p          <- function(theta, eta) { c(Ka = theta[["TVKa"]], CL = theta[["TVCL"]] * exp(eta[["iCL"]]),
+                                       V = theta[["TVV"]], F = theta[["TVF"]], Dose = theta[["TVDose"]])  }
+init       <- function(p) { c("x1" = p[["F"]] * p[["Dose"]], "x2" = 0) }
+output     <- function(y, p, eps) { y[["x2"]] / p[["V"]] + eps[["addErr"]] }
+```
+
+# Parameter definition
+The next piece of code sets the values for the structural parameters (`theta`).
+Some parameters can be considered as fixed.
+This is typically done for covariates (in this example the dose).
+The vectors `vartheta1` and `vartheta2` define two variants; the first one also sets the bio-availability F as fixed, the second one keeps it variable.
+
+Variance matrices `omega` and `sigma` are defined for the random variables `eta` and `eps`, respectively.
+Their row and column names should be the same as the ones used in the model definition.
+These matrices are the random-effects parameters.
+
+```{r}
+theta      <- c("TVKa" = 1, "TVCL" = 0.2, "TVV" = 2, "TVF" = 0.7, "TVDose" = 10)
+vartheta1  <- setdiff(names(theta), c("TVDose", "TVF"))     # Bioavailability F is fixed
+vartheta2  <- setdiff(names(theta), "TVDose")               # Bioavailability F is variable
+omega      <- diag(0.3, nrow = 1)
+colnames(omega) <- row.names(omega) <- c("iCL")
+sigma      <- diag(0.1, nrow = 1)
+colnames(sigma) <- row.names(sigma) <- c("addErr")
+```
+
+# Sampling times
+The vector `times` contains the sampling times.
+The initialization (in this example, the time of dosing) is always set to zero.
+
+```{r}
+times      <- seq(0, 10, 1)
+```
+
+# Variational equations
+As a first step in the calculation, the variational equations are solved.
+This is done two times, once for every setting of fixed parameters as defined above, and will create data frames `vareq1` and `vareq2` containing the derivatives of the model output (the concentration) with respect to the structural and random-effects parameters, evaluated at the sample times. The derivatives are plotted over time.
+The plot functions have options controlling which derivatives are plotted. See their documentation for details.
+
+```{r}
+vareq1 <- calcVariationsFim(model = model, p = p, init = init, output = output, times = times, symbolic = TRUE,
+                           theta = theta, nmeta = colnames(omega), nmeps = colnames(sigma), vartheta = vartheta1)
+plotVariations(vareq1)
+vareq2 <- calcVariationsFim(model = model, p = p, init = init, output = output, times = times, symbolic = TRUE,
+                            theta = theta, nmeta = colnames(omega), nmeps = colnames(sigma), vartheta = vartheta2)
+plotVariations(vareq2)
+```
+
+# Compute and plot Sensitivity Matrix Method (SMM) results
+SMM results are generated from the variational matrices `vareq1` and `vareq2` using the function `calcSensitivityFromMatrix`. The `outputs` argument controls which SMM indicators are computed.
+They are ([more details](https://lapp.nl/lapp-software/parid.html)):
+
+- The null space dimension `N`. This is a categorical indicator, equal to the number of unidentifiable directions. So 0 means identifiable, and larger than 0 means unidentifiable. 
+- The skewing angle `A`. This is a continuous indicator, taking values between 0 and 1, where 0 means unidentifiable, 1 means identifiable. If `A` is close to 0 then the model is close to unidentifiable.
+- The unidentifiable directions `R`. This lists the parameter directions in which the model is unidentifiable. The number of directions equals `N`.
+- The minimal parameter relations `M` and the M-norm given by its `norm` attribute. The M-norm is a continuous indicator, taking values between 0 and 1, where 0 means unidentifiable, 1 means identifiable. If the M-norm is close to 0 then the model is close to unidentifiable. For small M-norms, the vector `M` contains the parameter direction in which the model is unidentifiable.
+- The least identifiable parameter norms (L-norms) `L`. This is a vector of continuous indicators, one for each parameter, taking values between 0 and 1, where 0 means unidentifiable, 1 means identifiable. If a component of `L` is close to 0 then that parameter is close to unidentifiable.
+
+The results are displayed and graphed.
+The first variant, where the bio-availability F was fixed, is identifiable, as can be seen from the output of `simplifySensitivities(sens1)`: the null space dimension `N` is 0, and the skewing angle, M-norm and L-norms are all large.
+
+```{r}
+sens1 <- calcSensitivityFromMatrix(outputs = list("N", "A", "R", "M", "L"), df = vareq1, vars = vartheta1)
+simplifySensitivities(sens1)
+plsens1 <- plotSensitivities(sens1)
+plsens1 <- lapply(plsens1[lengths(plsens1) > 0], function(pl) pl + theme_bw(base_size = 8))
+cowplot::plot_grid(plotlist = plsens1, nrow = 1)
+```
+
+The second variant, where F was variable, is not identifiable, see the output of `simplifySensitivities(sens2)`: the null space dimension is 1, and the skewing angle, M-norm and L-norms are all small or even zero.
+The indicators `R` and `M` find a relation involving F, CL and V, as expected.
+
+```{r}
+sens2 <- calcSensitivityFromMatrix(outputs = list("N", "A", "R", "M", "L"), df = vareq2, vars = vartheta2)
+simplifySensitivities(sens2)
+plsens2 <- plotSensitivities(sens2)
+plsens2 <- lapply(plsens2[lengths(plsens2) > 0], function(pl) pl + theme_bw(base_size = 8))
+cowplot::plot_grid(plotlist = plsens2, nrow = 1)
+```
+
+# Compute and plot Aliasing Method results
+The results are generated from the variational matrices `vareq1` and `vareq2` using the function `calcAliasingFromMatrix`.
+The results are displayed and graphed.
+Both variants are identifiable, as aliasing scores are quite low. This is because the aliasing method can only find identifiability problems involving two parameters, and not three.
+
+```{r}
+alia1 <- calcAliasingScoresFromMatrix(df = vareq1, vars = vartheta1)
+plalia1 <- plotAliasing(alia1, elt = c("S", "T"))
+cowplot::plot_grid(plotlist = plalia1, nrow = 1)
+
+alia2 <- calcAliasingScoresFromMatrix(df = vareq2, vars = vartheta2)
+plalia2 <- plotAliasing(alia2, elt = c("S", "T"))
+cowplot::plot_grid(plotlist = plalia2, nrow = 1)
+```
+
+# Compute and plot Fisher Information Matrix Method (FIMM) results
+FIMM results are generated from the variational matrices `vareq1` and `vareq2` using the functions `calcFimFromMatrix` and `fimIdent`, that compute the Fisher Information Matrix (FIM) and the parameter identifiability indicators, respectively.
+The indicators are ([more details](https://lapp.nl/lapp-software/parid.html)):
+
+- Categorical identifiability `identifiable`. This is `TRUE` if all curvatures are 0 and the model is identifiable, and `FALSE` if there are positive curvatures and the model is unidentifiable. The curvatures describe the objective function value (OFV) surface as function of the parameters.
+- The number of 0 curvatures `nDirections`. This is a categorical indicator counting the number of 0 curvatures.
+- The parameter vectors `directions` corresponding to the curvatures, in order of increasing curvature. For zero (or small) curvatures, they indicate the directions in parameter space of (near) unidentifiability.
+- The curvature values `curvatures` of the OFV surface. Zero values correspond to unidentifiability, small values indicate near unidentifiability.
+- The index `jump` of the highest change in curvature value.
+- The estimated standard error `se`, calculated from the FIM.
+- The estimated relative standard error `rse`, calculated from the FIM.
+
+The results are displayed.
+The first variant, where the bio-availability F was fixed, is identifiable: all curvatures are high. The options `relChanges = TRUE` and `ci = 0.95` imply that the `directions` show the relative percentage changes corresponding to an insignificant increase (at 95%) in objective function of at most 3.84, for the given number of subjects. They are all below 50%.
+
+```{r}
+fim1 <- calcFimFromMatrix(df = vareq1, omega = omega, sigma = sigma, vartheta = vartheta1)
+fimres1 <- fimIdent(fim = fim1, curvature = 1e-10, relChanges = TRUE, ci = 0.95, nsubj = 30)
+simplifyFimIdent(fimres1)
+```
+
+The second variant, where F was variable, is not identifiable, as the first curvature is close to zero. It finds a relation involving F, CL and V in `directions`, as expected. The relative changes are very large, indicating that the parameters can change by a large factor without significantly changing the OFV.
+
+```{r}
+fim2 <- calcFimFromMatrix(df = vareq2, omega = omega, sigma = sigma, vartheta = vartheta2)
+fimres2 <- fimIdent(fim = fim2, curvature = 1e-10, relChanges = TRUE, ci = 0.95, nsubj = 30)
+simplifyFimIdent(fimres2)
+```
+

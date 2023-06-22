@@ -22,6 +22,17 @@ as a list of population, individual and residual parameters.
 This is the subset of \code{getAllParsVariations} corresponding to the columns present in the variational matrix.
 The output is the same as that of \code{getParVecVariations} except it is formatted as a list of three vectors.
 }
+\seealso{
+Other retrieval functions: 
+\code{\link{[.keepattr}()},
+\code{\link{getAllParsFim}()},
+\code{\link{getAllParsVariations}()},
+\code{\link{getParVecFim}()},
+\code{\link{getParVecVariations}()},
+\code{\link{getParsFim}()},
+\code{\link{subFim}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{retrieval functions}

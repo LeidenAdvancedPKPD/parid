@@ -44,6 +44,8 @@
 #'   The second is an error message (as a string), or \code{NULL} if there were no errors.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 checkSetSquareAndNames <-function(mat) {
   if(is.null(mat)) return(list(matrix(0, nrow = 0, ncol = 0), NULL))
   if(!is.matrix(mat)) return(list(mat, " not a matrix"))
@@ -72,6 +74,8 @@ checkSetSquareAndNames <-function(mat) {
 #'   and \code{NULL} if symmetric.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 checkSymm <- function(mat) {
   if(!isTRUE(all.equal(t(mat), mat))) return("not symmetric")
   return(NULL)
@@ -92,6 +96,8 @@ checkSymm <- function(mat) {
 #' @return  A list of two elements, namely the adapted versions of \code{mat} and \code{varmat}.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 removeEmptyRowCols <- function(mat, varmat) {
   # Assume symmetry so can check by row:
   row0 <- apply(mat, MARGIN = 1, FUN = function(row) all(row == 0))
@@ -116,6 +122,8 @@ removeEmptyRowCols <- function(mat, varmat) {
 #'   and \code{NULL} if positive definite. The empty matrix is by definition positive definite .
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 checkPosDef <- function(mat, tol = 1e-8) {
   if (nrow(mat) != ncol(mat)) return("not square")
   if (nrow(mat) == 0) return(NULL)
@@ -166,6 +174,8 @@ checkPosDef <- function(mat, tol = 1e-8) {
 #'   All four are adapted from input as described above.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 checkSetCovMat <- function(omega, sigma, varomega, varsigma, caller) {
   # Check and set row and column names of omega and sigma:
   out <- checkSetSquareAndNames(omega)
@@ -283,6 +293,8 @@ checkSetCovMat <- function(omega, sigma, varomega, varsigma, caller) {
 #'   the column names in \code{df} of the derivatives of the indicated type.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 checkSetDerivCols <- function(df, omega, sigma, vartheta, caller) {
   # List all eta and eps in omega and sigma:
   vareta <- row.names(omega)
@@ -347,6 +359,8 @@ checkSetDerivCols <- function(df, omega, sigma, vartheta, caller) {
 #'   The data frame may be empty if there were no cases to list.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 createOmegaSigmaCases <- function(varmat, isOmega) {
   cases <- data.frame(which(varmat & lower.tri(varmat, diag = TRUE), arr.ind = TRUE))
   cases[, "nam"] <- if (nrow(cases) == 0) rep("", 0) else {
@@ -370,6 +384,8 @@ createOmegaSigmaCases <- function(varmat, isOmega) {
 #' @return  tr(mat1^t mat2).
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 traceprod <- function(mat1, mat2) {
   # compute trace(mat1 * mat2) = sum_ij mat1[i, j]*mat2[i, j]
   sum(mat1 * mat2)
@@ -399,6 +415,8 @@ traceprod <- function(mat1, mat2) {
 #'   The function displays an error and returns \code{NULL} if \code{existNorm} is not in the specified format.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 computeNormalizers <- function(mat, relvec, existNorm) {
   if ((length(existNorm) != nrow(mat)) || any(names(existNorm) != colnames(mat))) {
     processErrors("FisherInfo::computeNormalizers: existing normalization information does not match variance-covariance matrix. Exiting.\n")
@@ -468,6 +486,8 @@ computeNormalizers <- function(mat, relvec, existNorm) {
 #'   the variance matrix cannot be inverted.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 doCalcFim <- function(df, omega, sigma, vartheta, varomega, varsigma, caller) {
   # De-normalize df. This also checks its validity:
   df <- normalizeVariations(df = df, parNorm = FALSE, outNorm = FALSE)
@@ -603,6 +623,8 @@ doCalcFim <- function(df, omega, sigma, vartheta, varomega, varsigma, caller) {
 #'
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 isValidFim <- function(df, nmdf = "input 'df'") {
   out <- NULL
   if(!"keepattr" %in% class(df)) {
@@ -710,6 +732,8 @@ isValidFim <- function(df, nmdf = "input 'df'") {
 #'   the variance matrix cannot be inverted.
 #'
 #' @export
+#' 
+#' @family calculation functions
 #'
 #' @author Martijn van Noort
 calcFimFromMatrix <- function(df, omega, sigma, vartheta, varomega = NULL, varsigma = NULL) {
@@ -793,6 +817,8 @@ calcFimFromMatrix <- function(df, omega, sigma, vartheta, varomega = NULL, varsi
 #'   
 #' @export
 #'
+#' @family calculation functions
+#' 
 #' @author Martijn van Noort
 calcFimFromModel <- function(model, p, init, output, times, theta, omega, sigma, vartheta = names(theta),
                              varomega = NULL, varsigma = NULL, symbolic = TRUE, chkModel = TRUE, ...) {
@@ -829,6 +855,8 @@ calcFimFromModel <- function(model, p, init, output, times, theta, omega, sigma,
 #'
 #' @export
 #'
+#' @family retrieval functions
+#' 
 #' @author Martijn van Noort
 getAllParsFim <- function(fim) {
   # Check input validity:
@@ -869,6 +897,8 @@ getAllParsFim <- function(fim) {
 #'   The function displays an error and returns \code{NULL} if \code{fim} is not a valid FIM.
 #'
 #' @export
+#' 
+#' @family retrieval functions
 #'
 #' @author Martijn van Noort
 getParsFim <- function(fim) {
@@ -893,6 +923,8 @@ getParsFim <- function(fim) {
 #'   The function displays an error and returns \code{NULL} if \code{fim} is not a valid FIM.
 #'
 #' @export
+#' 
+#' @family retrieval functions
 #'
 #' @author Martijn van Noort
 getParVecFim <- function(fim) {
@@ -966,6 +998,8 @@ getParVecFim <- function(fim) {
 #'   (e.g., a proportional error can be modelled as a fraction or as a percentage).
 #'
 #' @export
+#' 
+#' @family result modifiers
 #' 
 #' @author Martijn van Noort
 normalizeFim <- function(fim, thetaNorm = TRUE, omegaNorm = TRUE, sigmaNorm = TRUE, checkPos = TRUE) {
@@ -1086,6 +1120,8 @@ normalizeFim <- function(fim, thetaNorm = TRUE, omegaNorm = TRUE, sigmaNorm = TR
 #'
 #' @export
 #' 
+#' @family checkers
+#' 
 #' @author Martijn van Noort
 isNormalizedFim <- function(fim) {
   valid <- isValidFim(fim, nmdf = "input 'fim'")
@@ -1118,6 +1154,8 @@ isNormalizedFim <- function(fim) {
 #'   This should not be possible.
 #'
 #' @export
+#' 
+#' @family retrieval functions
 #'
 #' @author Martijn van Noort
 subFim <- function(fim, inds) {
@@ -1238,6 +1276,8 @@ subFim <- function(fim, inds) {
 #'   of subjects.
 #'   
 #' @export
+#' 
+#' @family calculation functions
 #'
 #' @author Martijn van Noort
 fimIdent <- function(fim, curvature, thetaNorm = FALSE, omegaNorm = FALSE, sigmaNorm = FALSE, relChanges = FALSE,
@@ -1333,6 +1373,8 @@ fimIdent <- function(fim, curvature, thetaNorm = FALSE, omegaNorm = FALSE, sigma
 #'   If the input list \code{fimId} does not contain this element, then it is returned without change.
 #'
 #' @export
+#' 
+#' @family result modifiers
 #'
 #' @author Martijn van Noort
 simplifyFimIdent <- function(fimId, tol = 0.001) {
@@ -1370,6 +1412,8 @@ simplifyFimIdent <- function(fimId, tol = 0.001) {
 #' @return   A plot.
 #'
 #' @export
+#' 
+#' @family plotting and printing
 #'
 #' @author Martijn van Noort
 plotFim <- function(fim, vars = NULL, log = TRUE, label = FALSE) {

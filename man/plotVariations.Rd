@@ -46,6 +46,14 @@ In case of error, an error message is printed and the return value is \code{NULL
 \description{
 Creates plots of the model and its variations, for a given variational matrix.
 }
+\seealso{
+Other plotting and printing: 
+\code{\link{plotAliasing}()},
+\code{\link{plotFim}()},
+\code{\link{plotSensitivities}()},
+\code{\link{print.keepattr}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{plotting and printing}

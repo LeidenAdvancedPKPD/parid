@@ -100,6 +100,19 @@ It is recommended to use symbolic derivation (\code{symbolic==TRUE}) rather than
 as it is more accurate, especially for derivatives that are formally zero.
 See \code{\link{calcVariations}} for details.
 }
+\seealso{
+Other calculation functions: 
+\code{\link{calcAliasingScoresFromMatrix}()},
+\code{\link{calcAliasingScoresFromModel}()},
+\code{\link{calcFimFromMatrix}()},
+\code{\link{calcFirstVariations}()},
+\code{\link{calcSensitivityFromMatrix}()},
+\code{\link{calcSensitivityFromModel}()},
+\code{\link{calcVariationsFim}()},
+\code{\link{calcVariations}()},
+\code{\link{fimIdent}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{calculation functions}

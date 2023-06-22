@@ -31,6 +31,14 @@ If this is not possible (it requires the package \code{ggnewscale}),
 then negative values are indicated by a '-' symbol.
 Optionally, the heatmap is labelled with the matrix values.
 }
+\seealso{
+Other plotting and printing: 
+\code{\link{plotAliasing}()},
+\code{\link{plotSensitivities}()},
+\code{\link{plotVariations}()},
+\code{\link{print.keepattr}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{plotting and printing}

@@ -22,6 +22,17 @@ This should not be possible.
 \code{subFim(fim, inds)} works just like \code{fim[inds, inds]}.
 Use \code{subFim} instead of normal matrix subsetting functions to preserve attributes.
 }
+\seealso{
+Other retrieval functions: 
+\code{\link{[.keepattr}()},
+\code{\link{getAllParsFim}()},
+\code{\link{getAllParsVariations}()},
+\code{\link{getParVecFim}()},
+\code{\link{getParVecVariations}()},
+\code{\link{getParsFim}()},
+\code{\link{getParsVariations}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{retrieval functions}

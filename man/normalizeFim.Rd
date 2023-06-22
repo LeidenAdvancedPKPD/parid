@@ -72,6 +72,13 @@ proportional errors, powers ("gamma"), Imax, etc.
 The reason is that these parameters may also be scaled by arbitrary multiplication factors
 (e.g., a proportional error can be modelled as a fraction or as a percentage).
 }
+\seealso{
+Other result modifiers: 
+\code{\link{normalizeVariations}()},
+\code{\link{simplifyFimIdent}()},
+\code{\link{simplifySensitivities}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{result modifiers}

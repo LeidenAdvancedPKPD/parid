@@ -24,6 +24,17 @@ that will keep attributes on extraction.
 If the object \code{x} is a variational matrix or FIM, they will be kept only if the result is still a valid
 variational matrix or FIM, respectively.
 }
+\seealso{
+Other retrieval functions: 
+\code{\link{getAllParsFim}()},
+\code{\link{getAllParsVariations}()},
+\code{\link{getParVecFim}()},
+\code{\link{getParVecVariations}()},
+\code{\link{getParsFim}()},
+\code{\link{getParsVariations}()},
+\code{\link{subFim}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{retrieval functions}

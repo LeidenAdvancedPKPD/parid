@@ -19,6 +19,14 @@ This is a special version for objects (in particular data frames or matrices) wi
 It removes the 'keepattr' class and prints according to the remaining class specification.
 If \code{x} is a variational matrix or FIM, it is printed without attributes.
 }
+\seealso{
+Other plotting and printing: 
+\code{\link{plotAliasing}()},
+\code{\link{plotFim}()},
+\code{\link{plotSensitivities}()},
+\code{\link{plotVariations}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{plotting and printing}

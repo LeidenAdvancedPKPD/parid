@@ -109,6 +109,8 @@
 #' This can be used in case of non-identifiability or identifiability (but is most useful near non-identifiability).
 #'
 #' @export
+#' 
+#' @family calculation functions
 #'
 #' @author Martijn van Noort
 calcSensitivityFromMatrix <- function(outputs, df, vars = NULL, Mthresh = NULL, normalizeM = TRUE, scaleM = TRUE) {
@@ -327,6 +329,8 @@ calcSensitivityFromMatrix <- function(outputs, df, vars = NULL, Mthresh = NULL, 
 #'   See \code{\link{calcVariations}} for details.
 #'
 #' @export
+#' 
+#' @family calculation functions
 #'
 #' @author Martijn van Noort
 calcSensitivityFromModel <- function(outputs, model, parms, init, outputPred, times, vars = names(parms),
@@ -361,6 +365,8 @@ calcSensitivityFromModel <- function(outputs, model, parms, init, outputPred, ti
 #'   If the input list \code{sens} does not contain these elements, then it is returned without change.
 #'
 #' @export
+#' 
+#' @family result modifiers
 #'
 #' @author Martijn van Noort
 simplifySensitivities <- function(sens, elt = NULL, tol = 0.001) {
@@ -398,6 +404,8 @@ simplifySensitivities <- function(sens, elt = NULL, tol = 0.001) {
 #'   In case of error, the return value is \code{NULL}.
 #'
 #' @export
+#' 
+#' @family plotting and printing
 #'
 #' @author Martijn van Noort
 plotSensitivities <- function(sens, elt = NULL) {

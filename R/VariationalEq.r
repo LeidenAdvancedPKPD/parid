@@ -63,6 +63,8 @@
 #'   contains elements not in \code{names(theta)}, and likewise for \code{eta} and \code{eps}.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 calcVariationsNum <- function(model, p, init, output, times, theta, eta, eps,
                               vartheta, vareta, vareps, secOrd, ...) {
   # Create the complements of vartheta, vareta and vareps, and the corresponding parameter vectors:
@@ -138,6 +140,8 @@ calcVariationsNum <- function(model, p, init, output, times, theta, eta, eps,
 #' @return A copy of this environment.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 copyEnv <- function(env) {
   as.environment(as.list(env, all.names=TRUE))
 }
@@ -158,6 +162,8 @@ copyEnv <- function(env) {
 #'   Returns \code{NULL} if there are none. This happens when \code{firstDerivCodes} is empty or NULL.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 createLowerTriSecondDerivCodes <- function(firstDerivCodes, sep = ".") {
     df <- expand.grid(j = seq_along(firstDerivCodes), i = seq_along(firstDerivCodes))
     df <- df[df[, "i"] <= df[, "j"], ]
@@ -194,6 +200,8 @@ createLowerTriSecondDerivCodes <- function(firstDerivCodes, sep = ".") {
 #'   included as needed.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 createDerivGreps <- function(derivCodes, compNames, varName, derivSep = "\\.", typeSep = "_", outnameSep = "_") {
   splitCodes <- strsplit(derivCodes, split = derivSep)
   splitCodesNames <- unlist(lapply(splitCodes, function(splitCode) paste0(c(varName, gsub(paste0("^.*", typeSep), "", splitCode[-1])), collapse = "_")))
@@ -224,6 +232,8 @@ createDerivGreps <- function(derivCodes, compNames, varName, derivSep = "\\.", t
 #' @return The transformed call.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 transformCall <- function(callExpr, pList) {
   lpList <- length(pList)
   if (is.atomic(callExpr) || is.name(callExpr)) {
@@ -296,6 +306,8 @@ transformCall <- function(callExpr, pList) {
 #'   is optional, and \code{<state>} codes the state or (if the state has no name) its index.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, vareta, vareps, secOrd) {
   # ---
   # Preliminaries.
@@ -537,6 +549,10 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
 #' @param cols  vector of strings specifying columns to be extracted
 #' 
 #' @return A data frame containing the required columns
+#' 
+#' @author Martijn van Noort
+#' 
+#' @noRd 
 extractDf <- function(df, cols) {
   out <- as.data.frame(matrix(0, nrow = nrow(df), ncol = length(cols)))
   names(out) <- cols
@@ -574,6 +590,10 @@ extractDf <- function(df, cols) {
 #' @return A vector with derivatives of order 0, 1, 2 of the state variables with respect to base parameters
 #'   (theta, eta and eps). The elements are named <nam>.<i>, where i is the sequence number of the component of y, 
 #'   and nam is of the form 'y', 'dy_d<v1>' or 'd2y_d<v1>_<v2>'.
+#'   
+#' @author Martijn van Noort
+#' 
+#' @noRd 
 calcVarSymb <- function(doutput, dpout, vartheta, vareta, vareps, secOrd) {
   namos <- unique(unlist(lapply(names(doutput), function(nam) strsplit(nam, "_")[[1]][[1]])))  # Component names (or indices) of output variables, in non-variational context
   namps <- names(dpout[[1]])  # Names of derived parameters
@@ -649,6 +669,8 @@ calcVarSymb <- function(doutput, dpout, vartheta, vareta, vareps, secOrd) {
 #'   then execution is stopped.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 analyzeBody <- function(callExpr, out = c(y.name = FALSE, y.nr = FALSE, y.comp = FALSE, y.vec = FALSE, y.brc = FALSE,
                                           p.name = FALSE, p.nr = FALSE, p.comp = FALSE, p.vec = FALSE, p.brc = FALSE,
                                           theta.name = FALSE, theta.nr = FALSE, theta.comp = FALSE, theta.vec = FALSE, theta.brc = FALSE,
@@ -723,6 +745,8 @@ analyzeBody <- function(callExpr, out = c(y.name = FALSE, y.nr = FALSE, y.comp =
 #'   then the return value is \code{NA}. This should never happen.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 checkVectorUse <- function(callExpr, atTailHeadBlock = TRUE) {
   # atHeadFinalBlock indicates whether this call expression is at the tail of the function, i.e., whether it contains the return statement. Should initialize to TRUE for function body.
   if (is.null(callExpr)) return(FALSE)        # Empty expression. This is ok
@@ -801,6 +825,8 @@ checkVectorUse <- function(callExpr, atTailHeadBlock = TRUE) {
 #'   In the first case, warning messages may be displayed.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 checkModelDef <- function(model, p, init, output, theta, eta, eps, showWarn) {
   varNames <- c("y", "p", "theta", "eta", "eps")  # Variables to check indexing for.
   errors    <- c()
@@ -959,6 +985,8 @@ checkModelDef <- function(model, p, init, output, theta, eta, eps, showWarn) {
 #'   or if integration of the model fails.
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 calcVariationsSymb <- function(model, p, init, output, times, theta, eta, eps,
                                vartheta, vareta, vareps, secOrd, chkModel, showWarn, ...) {
   if (chkModel) {
@@ -1004,8 +1032,9 @@ calcVariationsSymb <- function(model, p, init, output, times, theta, eta, eps,
 #' @return \code{NULL} if \code{df} is a valid data frame with a variational matrix,
 #'   and an error message or list of error messages if not.
 #'
-#'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 isValidVariations <- function(df, nmdf = "input 'df'") {
   out <- NULL
   if(!"keepattr" %in% class(df)) {
@@ -1163,6 +1192,8 @@ isValidVariations <- function(df, nmdf = "input 'df'") {
 #'   See \code{\link{calcVariationsFim}}.
 #'
 #' @export
+#' 
+#' @family calculation functions
 #'
 #' @author Martijn van Noort
 calcVariations <- function(model, p, init, output, times, theta, eta, eps,
@@ -1254,6 +1285,8 @@ calcVariations <- function(model, p, init, output, times, theta, eta, eps,
 #'   See \code{\link{calcVariations}} for details.
 #' 
 #' @export
+#' 
+#' @family calculation functions
 #'
 #' @author Martijn van Noort
 calcFirstVariations <- function(model, parms, init, outputPred, times, varp = names(parms), symbolic = TRUE, chkModel = TRUE, ...) {
@@ -1356,6 +1389,8 @@ calcFirstVariations <- function(model, parms, init, outputPred, times, varp = na
 #'   See \code{\link{calcVariations}} for details.
 #'
 #' @export
+#' 
+#' @family calculation functions
 #'
 #' @author Martijn van Noort
 calcVariationsFim <- function(model, p, init, output, times, theta, nmeta, nmeps,
@@ -1387,6 +1422,8 @@ calcVariationsFim <- function(model, p, init, output, times, theta, nmeta, nmeps
 #'   
 #'
 #' @export
+#' 
+#' @family retrieval functions
 #'
 #' @author Martijn van Noort
 getAllParsVariations <- function(df) {
@@ -1421,6 +1458,8 @@ getAllParsVariations <- function(df) {
 #'   
 #'
 #' @export
+#' 
+#' @family retrieval functions
 #'
 #' @author Martijn van Noort
 getParsVariations <- function(df) {
@@ -1449,6 +1488,8 @@ getParsVariations <- function(df) {
 #'   
 #'
 #' @export
+#' 
+#' @family retrieval functions
 #'
 #' @author Martijn van Noort
 getParVecVariations <- function(df) {
@@ -1504,6 +1545,8 @@ getParVecVariations <- function(df) {
 #'   to the new normalization.
 #'
 #' @export
+#' 
+#' @family result modifiers
 #'
 #' @author Martijn van Noort
 normalizeVariations <- function(df, parNorm = TRUE, outNorm = TRUE) {
@@ -1589,6 +1632,8 @@ normalizeVariations <- function(df, parNorm = TRUE, outNorm = TRUE) {
 #'   Function displays an error and returns \code{NULL} if the input is not in the specified format.
 #'
 #' @export
+#' 
+#' @family checkers
 #'
 #' @author Martijn van Noort
 isNormalizedVariations <- function(df) {
@@ -1627,6 +1672,8 @@ isNormalizedVariations <- function(df) {
 #'   In case of error, an error message is printed and the return value is \code{NULL}.
 #'
 #' @export
+#' 
+#' @family plotting and printing
 #'
 #' @author Martijn van Noort
 plotVariations <- function(df, outNames = NULL, plotModel = TRUE, plotFirst = TRUE, plotSecond = TRUE, plotIIV = FALSE, plotRes = TRUE, plotPoints = FALSE) {

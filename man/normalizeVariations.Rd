@@ -43,6 +43,13 @@ with P, and the output-normalization is done in the same way as for the first or
 If the matrix was already normalized one way or the other, then the normalization is adapted to the new settings.
 Parameter-normalization is selected per parameter, while output-normalization is a single choice.
 }
+\seealso{
+Other result modifiers: 
+\code{\link{normalizeFim}()},
+\code{\link{simplifyFimIdent}()},
+\code{\link{simplifySensitivities}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{result modifiers}

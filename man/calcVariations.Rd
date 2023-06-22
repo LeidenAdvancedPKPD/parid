@@ -145,6 +145,19 @@ If this function is used to calculate the Fisher Information matrix, then deriva
 and \code{eps = 0}, so the values of these inputs should be set to 0. Furthermore, in this case \code{secOrd = TRUE}.
 See \code{\link{calcVariationsFim}}.
 }
+\seealso{
+Other calculation functions: 
+\code{\link{calcAliasingScoresFromMatrix}()},
+\code{\link{calcAliasingScoresFromModel}()},
+\code{\link{calcFimFromMatrix}()},
+\code{\link{calcFimFromModel}()},
+\code{\link{calcFirstVariations}()},
+\code{\link{calcSensitivityFromMatrix}()},
+\code{\link{calcSensitivityFromModel}()},
+\code{\link{calcVariationsFim}()},
+\code{\link{fimIdent}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{calculation functions}

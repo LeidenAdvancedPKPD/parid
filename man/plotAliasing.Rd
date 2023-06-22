@@ -27,6 +27,14 @@ Element "T" is like "A", but also showing the aliasing scores as text.
 Generates several plots for normalized sensitivities and/or aliasing scores, as computed by
 \code{\link{calcAliasingScoresFromMatrix}} or \code{\link{calcAliasingScoresFromModel}}.
 }
+\seealso{
+Other plotting and printing: 
+\code{\link{plotFim}()},
+\code{\link{plotSensitivities}()},
+\code{\link{plotVariations}()},
+\code{\link{print.keepattr}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{plotting and printing}

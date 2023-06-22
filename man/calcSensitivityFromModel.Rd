@@ -121,7 +121,19 @@ See \code{\link{calcVariations}} for details.
 }
 \seealso{
 \code{\link{calcSensitivityFromMatrix}} for details on the calculation of the outputs.
+
+Other calculation functions: 
+\code{\link{calcAliasingScoresFromMatrix}()},
+\code{\link{calcAliasingScoresFromModel}()},
+\code{\link{calcFimFromMatrix}()},
+\code{\link{calcFimFromModel}()},
+\code{\link{calcFirstVariations}()},
+\code{\link{calcSensitivityFromMatrix}()},
+\code{\link{calcVariationsFim}()},
+\code{\link{calcVariations}()},
+\code{\link{fimIdent}()}
 }
 \author{
 Martijn van Noort
 }
+\concept{calculation functions}

@@ -98,6 +98,19 @@ observations are nearest to the span of the images of the other parameters.
 The images are calculated under a normalized version of the sensitivity matrix.
 This can be used in case of non-identifiability or identifiability (but is most useful near non-identifiability).
 }
+\seealso{
+Other calculation functions: 
+\code{\link{calcAliasingScoresFromMatrix}()},
+\code{\link{calcAliasingScoresFromModel}()},
+\code{\link{calcFimFromMatrix}()},
+\code{\link{calcFimFromModel}()},
+\code{\link{calcFirstVariations}()},
+\code{\link{calcSensitivityFromModel}()},
+\code{\link{calcVariationsFim}()},
+\code{\link{calcVariations}()},
+\code{\link{fimIdent}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{calculation functions}

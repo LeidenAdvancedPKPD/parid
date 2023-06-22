@@ -136,6 +136,19 @@ Standard errors and relative standard errors are calculated from the diagonal of
 (after applying normalization and block-diagonalization, if required), taking into account the number
 of subjects.
 }
+\seealso{
+Other calculation functions: 
+\code{\link{calcAliasingScoresFromMatrix}()},
+\code{\link{calcAliasingScoresFromModel}()},
+\code{\link{calcFimFromMatrix}()},
+\code{\link{calcFimFromModel}()},
+\code{\link{calcFirstVariations}()},
+\code{\link{calcSensitivityFromMatrix}()},
+\code{\link{calcSensitivityFromModel}()},
+\code{\link{calcVariationsFim}()},
+\code{\link{calcVariations}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{calculation functions}

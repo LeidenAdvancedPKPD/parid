@@ -64,6 +64,8 @@
 #'   In case of errors, the return value is \code{NULL}.
 #'
 #' @export
+#' 
+#' @family calculation functions
 #'
 #' @author Martijn van Noort
 calcAliasingScoresFromMatrix <- function(df, vars = NULL) {
@@ -171,6 +173,8 @@ calcAliasingScoresFromMatrix <- function(df, vars = NULL) {
 #'   See \code{\link{calcVariations}} for details.
 #'
 #' @export
+#' 
+#' @family calculation functions
 #'
 #' @author Martijn van Noort
 calcAliasingScoresFromModel <- function(model, parms, init, outputPred, times, vars = names(parms),
@@ -206,6 +210,8 @@ calcAliasingScoresFromModel <- function(model, parms, init, outputPred, times, v
 #'   Element "T" is like "A", but also showing the aliasing scores as text.
 #'
 #' @export
+#' 
+#' @family plotting and printing
 #'
 #' @author Martijn van Noort
 plotAliasing <- function(aliasing, elt = NULL, vars = NULL) {

@@ -45,6 +45,19 @@ using SimBiology, Github (2019).
 Sietse Braakman - A general workflow for parameter estimation to help establish confidence in model
 predictions, Rosa Webinar 2019-12-01, slides 39-42.
 }
+\seealso{
+Other calculation functions: 
+\code{\link{calcAliasingScoresFromModel}()},
+\code{\link{calcFimFromMatrix}()},
+\code{\link{calcFimFromModel}()},
+\code{\link{calcFirstVariations}()},
+\code{\link{calcSensitivityFromMatrix}()},
+\code{\link{calcSensitivityFromModel}()},
+\code{\link{calcVariationsFim}()},
+\code{\link{calcVariations}()},
+\code{\link{fimIdent}()}
+}
 \author{
 Martijn van Noort
 }
+\concept{calculation functions}

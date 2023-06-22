@@ -61,6 +61,8 @@ sigmaNormAttr <- "sigmaNormalized"     # Attribute where theta parameter normali
 #' @return \code{NULL}
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 processWarns <- function(warns) {
   if (length(warns) > 0) cat(paste0("Warning in ", warns), sep = "")
 }
@@ -76,6 +78,8 @@ processWarns <- function(warns) {
 #' @return \code{NULL}
 #'
 #' @author Martijn van Noort
+#' 
+#' @noRd 
 processErrors <- function(errors) {
   if (length(errors) > 0) cat(paste0("Error in ", errors), sep = "")
 }
@@ -103,6 +107,8 @@ processErrors <- function(errors) {
 #'   This can happen for example when a single element is extracted.
 #'
 #' @export
+#' 
+#' @family retrieval functions
 #'
 #' @author Martijn van Noort
 `[.keepattr` <- function(x, ...) {
@@ -148,6 +154,8 @@ processErrors <- function(errors) {
 #' @return \code{x}
 #'
 #' @export
+#' 
+#' @family plotting and printing
 #'
 #' @author Martijn van Noort
 print.keepattr <- function(x, ...) {
