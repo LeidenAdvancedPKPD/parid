@@ -19,8 +19,9 @@ devtools::install_github("LeidenAdvancedPKPD/parid")
 
 ## Documentation
 
-A worked out [example](https://github.com/LeidenAdvancedPKPD/parid/blob/main/tests/example.r) is available in the package.
-A showcase can be found [here](https://lapp.nl/lapp-software/parid.html).
+More information can be found on the [pkgdown](https://leidenadvancedpkpd.github.io/parid/) site.
+A worked out [example](https://github.com/LeidenAdvancedPKPD/parid/blob/main/tests/example.r) is available in the package. This is the same example as on the pkgdown site.
+A showcase can be found [here](https://lapp.nl/lapp-software/parid.html). This demonstrates a different example.
 
 ## License
 
