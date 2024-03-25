@@ -25,7 +25,7 @@ The parameter identifiability methods in this package provide the following uniq
 - Aliasing: developed by [Augustin et al](https://github.com/mathworks-SimBiology/AliasingScoreApp/blob/master/AliasingScore_Poster.pdf) in Matlab, and reimplemented here in R.
 
 
-For more details see the #documentation.
+For more details see the [Documentation section](#documentation).
 
 ## Installation
 
