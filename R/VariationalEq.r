@@ -1199,6 +1199,7 @@ isValidVariations <- function(df, nmdf = "input 'df'") {
 calcVariations <- function(model, p, init, output, times, theta, eta, eps,
                            vartheta = names(theta), vareta = names(eta), vareps = names(eps), secOrd = FALSE,
                            symbolic = TRUE, chkModel = TRUE, showWarn = TRUE, ...) {
+  times <- unique(times)
   # Check that vartheta, vareta and vareps contain valid parameter names:
   for (nam in c("theta", "eta", "eps")) {
     if (length(setdiff(get(paste0("var", nam)), names(get(nam)))) > 0) {
