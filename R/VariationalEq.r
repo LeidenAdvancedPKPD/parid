@@ -218,52 +218,53 @@ createDerivGreps <- function(derivCodes, compNames, varName, derivSep = "\\.", t
 }
 
 
-#------------------------------------------ transformCall ------------------------------------------
-#' Transform a call by rpelacing variables by functions or vice versa
+#------------------------------------------ transformExpr ------------------------------------------
+#' Transform an expression by replacing variables by functions or vice versa
 #' 
-#' Transforms a call (e.g. a function body) by replacing state variables by state functions or vice versa.
+#' Transforms an expression (e.g. a function body) by replacing state variables by state functions or vice versa.
 #' The state variables are assumed to be of the form 'y[[<state>]]', where state is a unique identifier
 #' of the component, of the form '<Component>_<Deriv1>_<Deriv2>', where the component may be a name or a number,
 #' and the derivatives are optional.
 #' 
-#' @param callExpr The call to transform.
+#' @param expr     The expression to transform.
 #' @param pList    List of parameters to be used as function arguments. Each element is a language object.
 #' 
-#' @return The transformed call.
+#' @return The transformed expression.
 #'
 #' @author Martijn van Noort
 #' 
 #' @noRd 
-transformCall <- function(callExpr, pList) {
+transformExpr <- function(expr, pList) {
   lpList <- length(pList)
-  if (is.atomic(callExpr) || is.name(callExpr)) {
-    return(callExpr)
-  } else if (is.call(callExpr)) {
-    # Check if callExpr equals y[[<state>]]:
-    isStateElt <- length(callExpr) >= 3 &&
-      identical(callExpr[[1]], quote(`[[`)) &&
-      identical(callExpr[[2]], quote(y))
-    # Check if callExpr equals FU_<state_deriv> (this is a reserved function name used to code state variables):
-    isStateFunction <- length(callExpr) == 1+lpList &&
-      grepl("^FU_", as.character(callExpr[[1]]))
-    for (i in 1:lpList) isStateFunction <- isStateFunction && identical(pList[[i]], callExpr[[i+1]])
+  if (is.atomic(expr) || is.name(expr)) {
+    return(expr)
+  } else if (is.call(expr)) {
+    # Check if expr equals y[[<state>]]:
+    isStateElt <- length(expr) >= 3 &&
+      identical(expr[[1]], quote(`[[`)) &&
+      identical(expr[[2]], quote(y))
+    # Check if expr equals FU_<state_deriv> (this is a reserved function name used to code state variables):
+    isStateFunction <- length(expr) == 1+lpList &&
+      grepl("^FU_", as.character(expr[[1]]))
+    for (i in 1:lpList) isStateFunction <- isStateFunction && identical(pList[[i]], expr[[i+1]])
     if (isStateElt) {
-      # Change callExpr to function if isStateElt:
-      callExpr <- as.call(c(as.name(paste0("FU_", callExpr[[3]])), pList))
+      # Change expr to function if isStateElt:
+      expr <- as.call(c(as.name(paste0("FU_", expr[[3]])), pList))
     } else if (isStateFunction) {
-      # Change callExpr to y[[]] if isStateFunction:
-      callExpr <- as.call(c(quote(`[[`), quote(y), gsub("^FU_", "", callExpr[[1]])))
-    } else callExpr <- as.call(unlist(lapply(X = callExpr, FUN = transformCall, pList = pList))) # Call transformCall recursively for other calls
-    return(callExpr)
-  } else if (is.pairlist(callExpr)) {
-    return(c("[", unlist(lapply(X = callExpr, FUN = transformCall, pList = pList)), "]")) # Call transformCall recursively for pairlists
+      # Change expr to y[[]] if isStateFunction:
+      expr <- as.call(c(quote(`[[`), quote(y), gsub("^FU_", "", expr[[1]])))
+    } else expr <- as.call(unlist(lapply(X = expr, FUN = transformExpr, pList = pList))) # Call transformExpr recursively for other expressions
+    return(expr)
+  } else if (is.pairlist(expr)) {
+    return(c("[", unlist(lapply(X = expr, FUN = transformExpr, pList = pList)), "]")) # Call transformExpr recursively for pairlists
   } else {
     # User supplied incorrect input
-    stop("Don't know how to handle type ", typeof(callExpr), 
+    stop("Don't know how to handle type ", typeof(expr), 
          call. = FALSE)
   }
 }
 
+    
 #------------------------------------------ createDerivsSymb ------------------------------------------
 #' Generate derivatives of model components symbolically
 #'
@@ -428,9 +429,9 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
         }
       }
     }
-    dmodele <- transformCall(body(model), pList)  # model with state variables replaced by functions
+    dmodele <- transformExpr(body(model), pList)  # model with state variables replaced by functions
     dmodele <- Deriv::Deriv(f = dmodele, x = nampsNonzeroDeriv, nderiv = nderiv, drule = mydrule)  # Take derivatives
-    dmodele <- transformCall(dmodele, pList)     # Transform back to state variables
+    dmodele <- transformExpr(dmodele, pList)     # Transform back to state variables
     dmodelCodes <- {
       dmodelPars <- paste(names(nampsNonzeroDeriv), nampsNonzeroDeriv, sep = "_")   # Derivatives wrt model pars.
       dmodelPars2 <- createLowerTriSecondDerivCodes(dmodelPars)
@@ -506,9 +507,9 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
     } else {
       # There are derivatives (wrt p or eps).
       # Inputs for derivative of output (doutpute, doutputCodes, doutputNeutrVec):
-      doutpute <- transformCall(body(output), pList)  # output with state variables replaced by functions
+      doutpute <- transformExpr(body(output), pList)  # output with state variables replaced by functions
       doutpute <- Deriv::Deriv(f = doutpute, x = c(nampsNonzeroDeriv, vareps), nderiv = nderiv, drule = mydrule)  # Take derivatives
-      doutpute <- transformCall(doutpute, pList)     # Transform back to state variables
+      doutpute <- transformExpr(doutpute, pList)     # Transform back to state variables
     }
     doutputCodes <- {
       doutputPars <- paste(names(c(nampsNonzeroDeriv, vareps)), c(nampsNonzeroDeriv, vareps), sep = "_")   # Derivatives wrt model pars and residuals.
@@ -642,71 +643,71 @@ calcVarSymb <- function(doutput, dpout, vartheta, vareta, vareps, secOrd) {
 #------------------------------------------ analyzeBody ------------------------------------------
 #' Analyze structure of a function body
 #'
-#' Dissects a given function body (technically, any call) to determine if forbidden functions \code{with},
+#' Dissects a given function body (technically, any expression) to determine if forbidden functions \code{with},
 #' \code{return} or \code{FU_...} occur anywhere, and to determine how the state \code{y} and parameter
 #' \code{p} are indexed.
 #' Functions \code{FU_...} are used internally to represent the state variables and therefore may not be used
 #' for other purposes.
-#' It does these checks by going recursively through the call tree.
+#' It does these checks by going recursively through the expression tree.
 #' This function assumes that \code{y} and \code{p} are the formal arguments representing the state and
 #' parameter vectors.
 #'
-#' @param callExpr A call, for example a function body.
+#' @param expr     An expression, for example a function body.
 #' @param out      Boolean vector storing the output indicators. Initialized to \code{FALSE} and this
 #'   should not be changed.
 #' 
 #' @return Boolean vector of the same format as \code{out}, where \code{TRUE} means the corresponding element
-#'   is present in \code{callExpr}, and \code{FALSE} means it is not.
+#'   is present in \code{expr}, and \code{FALSE} means it is not.
 #'   The elements are \code{y.name}, \code{y.nr} and \code{y.comp} indicating whether the vector \code{y}
 #'   is indexed by names (strings), numbers or by more complicated expressions (e.g. arithmetic expressions
 #'   or functions). The element \code{y.vec} indicates whether \code{y} is referred to as a vector.
 #'   The element \code{y.brc} indicates whether elements of \code{y} are referred to with a single bracket ('[]') or '$'.
-#'   More than one of these may be true, if multiple reference methods are used in \code{callExpr}.
+#'   More than one of these may be true, if multiple reference methods are used in \code{expr}.
 #'   The elements \code{p.name}, \code{p.nr}, \code{p.comp} and \code{p.vec} do the same for \code{p}, and likewise
 #'   for \code{theta}, \code{eta} and \code{eps}.
 #'   Elements \code{with}, \code{return} and \code{FU} indicate the presence of the associated functions.
-#'   If \code{callExpr} contains illegal components (anything other than a call, pairlist, atomic or name),
+#'   If \code{expr} contains illegal components (anything other than a call, pairlist, atomic or name),
 #'   then execution is stopped.
 #'
 #' @author Martijn van Noort
 #' 
 #' @noRd 
-analyzeBody <- function(callExpr, out = c(y.name = FALSE, y.nr = FALSE, y.comp = FALSE, y.vec = FALSE, y.brc = FALSE,
-                                          p.name = FALSE, p.nr = FALSE, p.comp = FALSE, p.vec = FALSE, p.brc = FALSE,
-                                          theta.name = FALSE, theta.nr = FALSE, theta.comp = FALSE, theta.vec = FALSE, theta.brc = FALSE,
-                                          eta.name = FALSE, eta.nr = FALSE, eta.comp = FALSE, eta.vec = FALSE, eta.brc = FALSE,
-                                          eps.name = FALSE, eps.nr = FALSE, eps.comp = FALSE, eps.vec = FALSE, eps.brc = FALSE,
-                                          with = FALSE, return = FALSE, FU = FALSE)) {
+analyzeBody <- function(expr, out = c(y.name = FALSE, y.nr = FALSE, y.comp = FALSE, y.vec = FALSE, y.brc = FALSE,
+                                      p.name = FALSE, p.nr = FALSE, p.comp = FALSE, p.vec = FALSE, p.brc = FALSE,
+                                      theta.name = FALSE, theta.nr = FALSE, theta.comp = FALSE, theta.vec = FALSE, theta.brc = FALSE,
+                                      eta.name = FALSE, eta.nr = FALSE, eta.comp = FALSE, eta.vec = FALSE, eta.brc = FALSE,
+                                      eps.name = FALSE, eps.nr = FALSE, eps.comp = FALSE, eps.vec = FALSE, eps.brc = FALSE,
+                                      with = FALSE, return = FALSE, FU = FALSE)) {
   varNames <- c("y", "p", "theta", "eta", "eps")  # Variables to check indexing for.
-  if (is.name(callExpr) && as.character(callExpr) %in% varNames) {
+  if (is.name(expr) && as.character(expr) %in% varNames) {
     # y or p appears as vector, i.e., without indexing:
-    out[[paste0(as.character(callExpr), ".vec")]] <- TRUE
+    out[[paste0(as.character(expr), ".vec")]] <- TRUE
     return(out)
   } 
-  if (is.atomic(callExpr) || is.name(callExpr)) {
+  if (is.atomic(expr) || is.name(expr)) {
     # atomic or name other than y or p, so reached leaf of tree and nothing to change:
     return(out)
-  } else if (is.call(callExpr)) {
-    if (length(callExpr) <= 1) {
+  } else if (is.call(expr)) {
+    if (length(expr) <= 1) {
       # Call without arguments (probably {}), so nothing to do.
       return(out)
     }
-    # Check if callExpr equals y[[...]] or p[[...]]:
-    callExpr2 <- as.character(callExpr[[2]])
-    if(length(callExpr) >= 3 && (identical(callExpr[[1]], quote(`[`)) || identical(callExpr[[1]], quote(`$`))) && callExpr2 %in% varNames) {
-      out[paste0(callExpr2, ".brc")] <- TRUE
+    # Check if expr equals y[[...]] or p[[...]]:
+    expr2 <- as.character(expr[[2]])
+    if(length(expr) >= 3 && (identical(expr[[1]], quote(`[`)) || identical(expr[[1]], quote(`$`))) && expr2 %in% varNames) {
+      out[paste0(expr2, ".brc")] <- TRUE
       return(out)
     }
-    if(length(callExpr) >= 3 && identical(callExpr[[1]], quote(`[[`))) {
-      if(callExpr2 %in% varNames) {
-        cls <- class(callExpr[[3]])         # index is character string or number or more complicated
+    if(length(expr) >= 3 && identical(expr[[1]], quote(`[[`))) {
+      if(expr2 %in% varNames) {
+        cls <- class(expr[[3]])         # index is character string or number or more complicated
         type <- if (cls == "character") "name" else if (cls == "numeric") "nr" else "comp"
-        out[[paste0(callExpr2, ".", type)]] <- TRUE 
+        out[[paste0(expr2, ".", type)]] <- TRUE 
         return(out)
       }
     }
-    # Check if callExpr equals "with()" or "return()" or "FU_...()"
-    fun <- as.character(callExpr[[1]])
+    # Check if expr equals "with()" or "return()" or "FU_...()"
+    fun <- as.character(expr[[1]])
     if(identical(fun, "with") || identical(fun, "return") || grepl("^FU_", fun[[1]])) {
       if (grepl("^FU_", fun[[1]])) fun <- "FU"
       out[[fun]] <- TRUE
@@ -714,15 +715,14 @@ analyzeBody <- function(callExpr, out = c(y.name = FALSE, y.nr = FALSE, y.comp =
     }
     
     # Otherwise, dig deeper
-    outList <- lapply(X = callExpr, FUN = analyzeBody, out = out)  # Call analyzeBody recursively for other calls
+    outList <- lapply(X = expr, FUN = analyzeBody, out = out)  # Call analyzeBody recursively for other expressions
     return(Reduce("|", x = outList, init = out))
-  } else if (is.pairlist(callExpr)) {
-    outList <- unlist(lapply(X = callExpr, FUN = analyzeBody, pList = out)) # Call analyzeBody recursively for pairlists
+  } else if (is.pairlist(expr)) {
+    outList <- unlist(lapply(X = expr, FUN = analyzeBody, pList = out)) # Call analyzeBody recursively for pairlists
     return(Reduce("|", x = outList, init = out))
   } else {
     # User supplied incorrect input
-    stop("Don't know how to handle type ", typeof(callExpr), 
-         call. = FALSE)
+    stop("Don't know how to handle type ", typeof(expr), call. = FALSE)
   }
 }
 
@@ -730,55 +730,55 @@ analyzeBody <- function(callExpr, out = c(y.name = FALSE, y.nr = FALSE, y.comp =
 #------------------------------------------ checkVectorUse ------------------------------------------
 #' check vector use in a function body
 #'
-#' Dissects a given function body (technically, any call) to determine if forbidden vectorizing functions \code{c}
-#' or \code{`:`} occur anywhere outside the return value.
-#' It does so by going recursively through the call tree.
+#' Dissects a given function body (technically, any expression) to determine if forbidden vectorizing functions
+#' \code{c} or \code{`:`} occur anywhere outside the return value.
+#' It does so by going recursively through the expression tree.
 #'
-#' @param callExpr        A call, for example a function body.
-#' @param atTailHeadBlock Boolean vector storing whether this call is at the tail of the function, i.e.,
+#' @param expr            An expression, for example a function body.
+#' @param atTailHeadBlock Boolean vector storing whether this expression is at the tail of the function, i.e.,
 #'   whether it contains the return statement.
 #'   Initialized to \code{TRUE} and this should not be changed.
 #' 
 #' @return \code{TRUE} if \code{c} or \code{`:`} occur anywhere outside the return statement, and \code{FALSE}
 #'   if they only occur in the return value (or not at all).
-#'   If \code{callExpr} contains illegal components (anything other than a call, pairlist, atomic or name),
+#'   If \code{expr} contains illegal components (anything other than a call, pairlist, atomic or name),
 #'   then the return value is \code{NA}. This should never happen.
 #'
 #' @author Martijn van Noort
 #' 
 #' @noRd 
-checkVectorUse <- function(callExpr, atTailHeadBlock = TRUE) {
-  # atHeadFinalBlock indicates whether this call expression is at the tail of the function, i.e., whether it contains the return statement. Should initialize to TRUE for function body.
-  if (is.null(callExpr)) return(FALSE)        # Empty expression. This is ok
-  if (is.atomic(callExpr)) return(FALSE)      # Atomic expression. This is ok
-  if (is.name(callExpr)) return(FALSE)        # Name (i.e., symbol). This is ok
-  if(is.call(callExpr) && identical(callExpr[[1]], quote(`{`))) {
+checkVectorUse <- function(expr, atTailHeadBlock = TRUE) {
+  # atHeadFinalBlock indicates whether this expression is at the tail of the function, i.e., whether it contains the return statement. Should initialize to TRUE for function body.
+  if (is.null(expr)) return(FALSE)        # Empty expression. This is ok
+  if (is.atomic(expr)) return(FALSE)      # Atomic expression. This is ok
+  if (is.name(expr)) return(FALSE)        # Name (i.e., symbol). This is ok
+  if(is.call(expr) && identical(expr[[1]], quote(`{`))) {
     # Expression is block start:
-    if(length(callExpr) == 1) return(FALSE)   # Empty block. This is ok
+    if(length(expr) == 1) return(FALSE)   # Empty block. This is ok
     out <- FALSE
-    if(length(callExpr) > 2) {
+    if(length(expr) > 2) {
       # More than one statement. Check the ones before the last one:
-      for (i in 2:(length(callExpr)-1)) {
-        out <- out || checkVectorUse(callExpr[[i]], FALSE)   # out to TRUE if any of these is a problem
+      for (i in 2:(length(expr)-1)) {
+        out <- out || checkVectorUse(expr[[i]], FALSE)   # out to TRUE if any of these is a problem
       }
     }
-    return(out || checkVectorUse(callExpr[[length(callExpr)]], atTailHeadBlock))  # Evaluate final statement of block
+    return(out || checkVectorUse(expr[[length(expr)]], atTailHeadBlock))  # Evaluate final statement of block
   }
-  if(is.call(callExpr) && (identical(callExpr[[1]], quote(`c`)) || identical(callExpr[[1]], quote(`:`)))) {
+  if(is.call(expr) && (identical(expr[[1]], quote(`c`)) || identical(expr[[1]], quote(`:`)))) {
     # Expression is vector
-    if(atTailHeadBlock) return(FALSE) else if(length(callExpr) > 2) return(TRUE) else return(FALSE)
+    if(atTailHeadBlock) return(FALSE) else if(length(expr) > 2) return(TRUE) else return(FALSE)
   }
-  if(is.call(callExpr)) {
+  if(is.call(expr)) {
     # Any other expression. Check its parts:
     out <- FALSE
-    if(length(callExpr) > 1) {
-      for (i in 2:(length(callExpr))) {
-        out <- out || checkVectorUse(callExpr[[i]], FALSE)   # out to TRUE if any of these is a problem
+    if(length(expr) > 1) {
+      for (i in 2:(length(expr))) {
+        out <- out || checkVectorUse(expr[[i]], FALSE)   # out to TRUE if any of these is a problem
       }
     }
     return(out)
   }
-  if(is.pairlist(callExpr)) return(TRUE)  # Pairlists are not allowed anywhere in the function body.
+  if(is.pairlist(expr)) return(TRUE)  # Pairlists are not allowed anywhere in the function body.
   return(NA)  # This should not happen
 }
 
@@ -944,6 +944,159 @@ checkModelDef <- function(model, p, init, output, theta, eta, eps, showWarn) {
 }
 
 
+#------------------------------------------ getNamesInFunction ------------------------------------------
+#' Get names that appear on the left hand side in the given function
+#'
+#' Gets all strings that appear as names in the given function, e.g., as \code{c(name = object)}.
+#'
+#' @param fu    Function to analyze.
+#'
+#' @return A character vector of names.
+#'
+#' @author Martijn van Noort
+#' 
+#' @noRd 
+getNamesInFunction <- function(fu) {
+  out <- doGetNames(body(fu))
+  sort(setdiff(out, ""))  # Remove empty names and duplicates
+}
+
+
+#------------------------------------------ doGetNames ------------------------------------------
+#' workhorse of \link{getNamesInFunction}
+#'
+#' Gets the strings that appear as names in the given expression.
+#'
+#' @param expr    An expression, for example the body of a function.
+#'
+#' @return A character vector of names.
+#'
+#' @author Martijn van Noort
+#' 
+#' @noRd 
+doGetNames <- function(expr) {
+  if (is.atomic(expr) || is.name(expr)) return(names(expr))  # Return names if atomic or name
+  c(names(expr), unlist(lapply(expr, doGetNames)))           # Otherwise, search recursively
+}
+
+
+#------------------------------------------ getRefsInFunction ------------------------------------------
+#' Get names that appear on the right hand side in the given function
+#'
+#' Gets all strings that appear as values in the given function, e.g., as \code{x <- "string"}.
+#'
+#' @param fu    Function to analyze.
+#'
+#' @return A character vector of values.
+#'
+#' @author Martijn van Noort
+#' 
+#' @noRd 
+getRefsInFunction <- function(fu) {
+  out <- doGetRefs(body(fu))
+  sort(setdiff(out, ""))  # Remove empty referred names and duplicates
+}
+
+
+#------------------------------------------ doGetRefs ------------------------------------------
+#' workhorse of \link{getRefsInFunction}
+#'
+#' Gets the strings that appear as names in the given expression.
+#'
+#' @param expr    An expression, for example the body of a function.
+#'
+#' @return A character vector of names.
+#'
+#' @author Martijn van Noort
+#' 
+#' @noRd 
+doGetRefs <- function(expr) {
+  # Return name if atomic character.
+  if (is.atomic(expr)) return(if (is.character(expr)) as.character(expr) else NULL)
+  if (is.name(expr)) return(NULL)
+  unlist(lapply(expr, doGetRefs)) # Otherwise, search recursively
+}
+
+
+#------------------------------------------ createNewNamesRefs ------------------------------------------
+#' Generate unique new names and references for the given ones not ending in an alphabetic character
+#'
+#' Finds names not ending in an alphabetic character, and generates unique names that do end in an alphabetic
+#' character by repeatedly appending "X".
+#'
+#' @param oldNames    Character vector of names to be modified.
+#'
+#' @return A list of two elements. The first is a vector of indices in \code{oldNames} where the name was modified.
+#'         The second is a character vector with modified names.
+#'
+#' @author Martijn van Noort
+#' 
+#' @noRd 
+createNewNamesRefs <- function(oldNames) {
+  inds <- grep("[^[:alpha:]]$", oldNames)
+  newNames <- oldNames
+  if (length(inds) > 0) {
+    for (ind in inds) {
+      nam <- oldNames[[ind]]
+      while (nam %in% c(oldNames, newNames)) nam <- paste0(nam, "X")
+      newNames[[ind]] <- nam
+    }
+  }
+  list(indices = inds, newNames = newNames)
+}
+
+
+#------------------------------------------ replaceNamesRefs ------------------------------------------
+#' Replace names and references in a given function
+#'
+#' Replace the names in the function \code{fu} according to \code{replace}.
+#' The purpose of this is to replace names not ending in an alphabetic character by ones that do.
+#'
+#' @param fu          Function to modify.
+#' @param replace     Named character vector of the form \code{original name = new name}.
+#'
+#' @return The function \code{fu} with modified names.
+#'
+#' @author Martijn van Noort
+#' 
+#' @noRd 
+replaceNamesRefs <- function(fu, replace) {
+  body(fu) <- doReplaceNamesRefs(body(fu), replace)
+  fu
+}
+
+
+#------------------------------------------ doReplaceNamesRefs ------------------------------------------
+#' workhorse of \link{replaceNamesRefs}
+#'
+#' Replace the names in \code{oldNames} by the corresponding ones in \code{newNames}, in the expression \code{expr}.
+#' The purpose of this is to replace names not ending in an alphabetic character by ones that do.
+#'
+#' @param expr        An expression, for example the body of a function.
+#' @param replace     Named character vector of the form \code{original name = new name}.
+#'
+#' @return The expression \code{expr} with modified names.
+#'
+#' @author Martijn van Noort
+#' 
+#' @noRd 
+doReplaceNamesRefs <- function(expr, replace) {
+  if (is.atomic(expr) || is.name(expr)) {
+    if(!is.null(names(expr))) expr <- plyr::rename(expr, replace, warn_missing = FALSE)
+    if (is.atomic(expr)&& is.character(expr)) expr <- plyr::revalue(as.character(expr), replace, warn_missing = FALSE)
+    return(expr)
+  } else {
+    if (is.list(expr)) {
+      expr <- lapply(expr, doReplaceNamesRefs, replace = replace)  # This branch is needed only for back-replacement from Deriv::Deriv results.
+    } else if (is.call(expr)) {
+      expr <- as.call(unlist(lapply(expr, doReplaceNamesRefs, replace = replace))) # Otherwise, replace recursively
+    } else stop("unknown object")
+    if(!is.null(names(expr))) expr <- plyr::rename(expr, replace, warn_missing = FALSE)
+    return(expr)
+  }
+}
+
+
 #------------------------------------------ calcVariationsSymb ------------------------------------------
 #' Calculate variations symbolically
 #'
@@ -992,23 +1145,67 @@ calcVariationsSymb <- function(model, p, init, output, times, theta, eta, eps,
   if (chkModel) {
     if (!checkModelDef(model, p, init, output, theta, eta, eps, showWarn)) return(NULL)
   }
-  parms <- p(theta, eta)
+  # Adapt names appearing in the functions, so that all end in an alphabetic character (this is needed to avoid ambiguity in the results of Deriv::Deriv):
+  # First create a list of all names used on the left or right hand side in model components:
+  oldNames <- sort(unique(unlist(lapply(list(p, init, model, output), function(fu) {
+    c(getNamesInFunction(fu), getRefsInFunction(fu))
+  }))))
+  newIndsNames <- createNewNamesRefs(oldNames)
+  inds <- newIndsNames[[1]]
+  newNames <- newIndsNames[[2]]
+  # Then, create versions of model components where all names end in an alphabetic character:
+  repl <- newNames[inds]
+  names(repl) <- oldNames[inds]
+  pmdf        <- replaceNamesRefs(p,      repl)
+  initmdf     <- replaceNamesRefs(init,   repl)
+  modelmdf    <- replaceNamesRefs(model,  repl)
+  outputmdf   <- replaceNamesRefs(output, repl)
+  thetamdf    <- plyr::rename(theta, repl, warn_missing = FALSE)
+  etamdf      <- plyr::rename(eta, repl, warn_missing = FALSE)
+  epsmdf      <- plyr::rename(eps, repl, warn_missing = FALSE)
+  varthetamdf <- plyr::mapvalues(vartheta, names(repl), repl, warn_missing = FALSE)
+  varetamdf   <- plyr::mapvalues(vareta,   names(repl), repl, warn_missing = FALSE)
+  varepsmdf   <- plyr::mapvalues(vareps,   names(repl), repl, warn_missing = FALSE)
+
+  # Find parameter values, and times:
+  parms <- pmdf(thetamdf, etamdf)
   xTimes <- sort(unique(c(0, times)))
-  dfu <- createDerivsSymb(model, p, init, output, theta, eta, eps, vartheta, vareta, vareps, secOrd)
+  
+  # Create variational function to integrate:
+  dfu <- createDerivsSymb(modelmdf, pmdf, initmdf, outputmdf, thetamdf, etamdf, epsmdf,
+                          varthetamdf, varetamdf, varepsmdf, secOrd)
   nOutputs <- length(dfu[["output"]](dfu[["init"]](parms), parms, eps))
   fu <- function(t, y, p, eps) {
     c(list(dfu[["model"]](t, y, p)), dfu[["output"]](y, p, eps))
   }
+  
+  # Integrate variational ODE:
   out <- try(deSolve::lsoda(y = dfu[["init"]](parms), times = xTimes, func = fu, parms = parms, eps = eps, ...))
   if(inherits(out, "try-error")) return(NULL)
   out <- as.data.frame(out[out[, "time"] %in% times, c(1, (ncol(out)-nOutputs+1):ncol(out)), drop = FALSE])
-  out <- calcVarSymb(out[, -1], dfu[["p"]](theta, eta), vartheta, vareta, vareps, secOrd) # Change to derivs of base parameters (theta, eta, eps)
+  
+  out <- calcVarSymb(out[, -1], dfu[["p"]](thetamdf, etamdf), varthetamdf, varetamdf, varepsmdf, secOrd) # Change to derivs of base parameters (theta, eta, eps)
   colnames <- gsub("\\..*?$", "", names(out))
   colnames <- colnames[!duplicated(colnames)]
-  out <- reshape2::melt(cbind(data.frame(t = times), out), id.vars = "t")
+  out <- reshape2::melt(cbind(data.frame(t = times), out), id.vars = "t")  # Tall format
   out[, "i"] <- as.numeric(gsub("^.*\\.", "", out[, "variable"]))
   out[, "var"] <- gsub("\\..*?$", "", out[, "variable"])
-  return(reshape2::dcast(out, t+i ~ var, value.var = "value")[, c("t", "i", colnames)])
+  out <- reshape2::dcast(out, t+i ~ var, value.var = "value")[, c("t", "i", colnames)]  # Back to wide format
+  
+  # Revert variable names back to their original values:
+  for (ind in inds) {
+    colnames(out) <- gsub(paste0("^dy_d\\Q", newNames[[ind]], "\\E$"),
+                          paste0("dy_d", oldNames[[ind]]),
+                          colnames(out))
+    colnames(out) <- gsub(paste0("^d2y_d\\Q", newNames[[ind]], "\\E_(.*)$"),
+                          paste0("d2y_d", oldNames[[ind]], "_\\1"),
+                          colnames(out))
+    colnames(out) <- gsub(paste0("^d2y_d(.*)_\\Q", newNames[[ind]], "\\E$"),
+                          paste0("d2y_d\\1_", oldNames[[ind]]),
+                          colnames(out))
+  }
+  
+  return(out)
 }
 
 
