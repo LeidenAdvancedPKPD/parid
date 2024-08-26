@@ -609,6 +609,23 @@ calcVarSymb <- function(doutput, dpout, vartheta, vareta, vareps, secOrd) {
     rep(c("", dv, if(secOrd) dv2 else NULL), each = length(namos))
   }  # vector of strings containing the derivatives to be taken ("" for no derivative, "var" for first
   #    derivative in var, "var1_var2" for second derivative in var1 and var2).
+  
+  # If second derivs, compute first and second derivs wrt derived parameters
+  doutput1s <- if(secOrd) sapply(namos, simplify = FALSE, USE.NAMES = TRUE, function(namo) {
+    # Note sapply names output by namos, in contrast to lapply which has no names.
+    extractDf(doutput, paste0(namo, "_", namps))
+  }) else NULL
+  # doutput1s contains the first derivatives dy/dp. It is a list with one element for each output in namos.
+  # Each element is a data frame with one column for each derived parameter and one row for each time point.
+  doutput2s <- if(secOrd) sapply(namos, simplify = FALSE, USE.NAMES = TRUE, function(namo) {
+    plyr::aaply(namesHessian, .margins = c(1,2),
+                .fun = function(elt) extractDf(doutput, paste0(namo, "_", elt))[, 1])
+  }) else NULL
+  # doutput2s contains the second derivatives d^2y/dp^2. It is a list with one element for each output in namos.
+  # Each element is an array with dimension p times p times k, where p is the number of derived parameters
+  # and k the number of time points. That is, for a fixed third index, this is the Hessian at that time point.
+  
+  # Compute derivs wrt base params
   out <- mapply(derivCase = derivCases, namo = namos, SIMPLIFY = FALSE, function(derivCase, namo) {
     derivs  <- strsplit(derivCase, "_")[[1]]  # Derivatives are taken with respect to these base parameters (may be empty)
     derivs  <- derivs[!derivs %in% vareps]    # Restrict to theta and eta derivatives
@@ -625,10 +642,10 @@ calcVarSymb <- function(doutput, dpout, vartheta, vareta, vareps, secOrd) {
       namp2 <- paste0("p_", derivCase)  # Name of second deriv
       dpout1 <- dpout[namp1]            # List of two vectors of first derivs of p wrt namp1
       dpout2 <- dpout[[namp2]]          # Vector of second derivs of p wrt namp2
-      doutput1 <- extractDf(doutput, paste0(namo, "_", namps))   # Since derivNr = 2, there are no derivatives wrt residual, so no need to account for them.
-      doutput2 <- lapply(1:nrow(doutput), function(i) apply(namesHessian, MARGIN = c(1,2), function(elt) as.numeric(extractDf(doutput[i, ], paste0(namo, "_", elt)))))
-      out1 <- unlist(lapply(doutput2, function(doutput2e) as.numeric(dpout1[[1]] %*% doutput2e %*% dpout1[[2]])))
-      out2 <- unlist(plyr::alply(doutput1, .margins = 1, function(row) as.numeric(row) %*% dpout2))
+      doutput1 <- doutput1s[[namo]]     # First derivs dy/dp. Since derivNr = 2, there are no derivatives wrt residual, so no need to account for them.
+      doutput2 <- doutput2s[[namo]]     # Second derivs d^2y/dp^2
+      out1 <- unlist(plyr::alply(doutput2, .margins = 3, function(doutput2e) as.numeric(dpout1[[1]] %*% doutput2e %*% dpout1[[2]]))) # 2nd derivs dp/dv d^2y/dp^2 dp/dv (p = derived parameters, v = theta and eta parameters)
+      out2 <- as.numeric(as.matrix(doutput1) %*% dpout2)
       return(out1+out2)
     }
   })
