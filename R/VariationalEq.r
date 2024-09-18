@@ -618,7 +618,7 @@ calcVarSymb <- function(doutput, dpout, vartheta, vareta, vareps, secOrd) {
   # doutput1s contains the first derivatives dy/dp. It is a list with one element for each output in namos.
   # Each element is a data frame with one column for each derived parameter and one row for each time point.
   doutput2s <- if(secOrd) sapply(namos, simplify = FALSE, USE.NAMES = TRUE, function(namo) {
-    plyr::aaply(namesHessian, .margins = c(1,2),
+    plyr::aaply(namesHessian, .margins = c(1,2), .drop = FALSE,
                 .fun = function(elt) extractDf(doutput, paste0(namo, "_", elt))[, 1])
   }) else NULL
   # doutput2s contains the second derivatives d^2y/dp^2. It is a list with one element for each output in namos.
@@ -1191,13 +1191,13 @@ calcVariationsSymb <- function(model, p, init, output, times, theta, eta, eps,
   # Create variational function to integrate:
   dfu <- createDerivsSymb(modelmdf, pmdf, initmdf, outputmdf, thetamdf, etamdf, epsmdf,
                           varthetamdf, varetamdf, varepsmdf, secOrd)
-  nOutputs <- length(dfu[["output"]](dfu[["init"]](parms), parms, eps))
+  nOutputs <- length(dfu[["output"]](dfu[["init"]](parms), parms, epsmdf))
   fu <- function(t, y, p, eps) {
     c(list(dfu[["model"]](t, y, p)), dfu[["output"]](y, p, eps))
   }
   
   # Integrate variational ODE:
-  out <- try(deSolve::lsoda(y = dfu[["init"]](parms), times = xTimes, func = fu, parms = parms, eps = eps, ...))
+  out <- try(deSolve::lsoda(y = dfu[["init"]](parms), times = xTimes, func = fu, parms = parms, eps = epsmdf, ...))
   if(inherits(out, "try-error")) return(NULL)
   out <- as.data.frame(out[out[, "time"] %in% times, c(1, (ncol(out)-nOutputs+1):ncol(out)), drop = FALSE])
   
@@ -1598,13 +1598,13 @@ calcFirstVariations <- function(model, parms, init, outputPred, times, varp = na
 #'   nonzero variance, so inclusion of all random parameters with nonzero variance is not only necessary but also sufficient.
 #'   That is, \code{vareta} and \code{vareps} can be set equal to the sets of all individual and residual parameters with
 #'   nonzero variance, respectively.
-#' 
+#'
 #' @note It is recommended to use symbolic derivation (\code{symbolic==TRUE}) rather than numerical derivation,
 #'   as it is more accurate, especially for derivatives that are formally zero.
 #'   See \code{\link{calcVariations}} for details.
 #'
 #' @export
-#' 
+#'
 #' @family calculation functions
 #'
 #' @author Martijn van Noort
@@ -1634,10 +1634,10 @@ calcVariationsFim <- function(model, p, init, output, times, theta, nmeta, nmeps
 #'   The list elements are named "theta", "eta" and "eps", respectively.
 #'   The vector elements have the names of the parameters.
 #'   The function displays an error and returns \code{NULL} if \code{df} is not a valid variational matrix.
-#'   
+#'
 #'
 #' @export
-#' 
+#'
 #' @family retrieval functions
 #'
 #' @author Martijn van Noort
@@ -1670,10 +1670,10 @@ getAllParsVariations <- function(df) {
 #'   The list elements are named "theta", "eta" and "eps", respectively.
 #'   The vector elements have the names of the parameters.
 #'   The function displays an error and returns \code{NULL} if \code{df} is not a valid variational matrix.
-#'   
+#'
 #'
 #' @export
-#' 
+#'
 #' @family retrieval functions
 #'
 #' @author Martijn van Noort
@@ -1700,10 +1700,10 @@ getParsVariations <- function(df) {
 #'   create the variational matrix and present as columns of the matrix, in the order of appearance in the matrix.
 #'   The names are the names of the parameters.
 #'   The function displays an error and returns \code{NULL} if \code{df} is not a valid variational matrix.
-#'   
+#'
 #'
 #' @export
-#' 
+#'
 #' @family retrieval functions
 #'
 #' @author Martijn van Noort
@@ -1735,7 +1735,7 @@ getParVecVariations <- function(df) {
 #' For the second order matrix (actually tensor), parameter-normalization involves two suitable multiplications
 #' with P, and the output-normalization is done in the same way as for the first order matrix.
 #' If the matrix was already normalized one way or the other, then the normalization is adapted to the new settings.
-#' Parameter-normalization is selected per parameter, while output-normalization is a single choice. 
+#' Parameter-normalization is selected per parameter, while output-normalization is a single choice.
 #'
 #' @param df      A data frame containing a variational matrix, optionally with second order derivatives,
 #'   as produced by \code{\link{calcVariations}}, \code{\link{calcFirstVariations}} or
@@ -1760,7 +1760,7 @@ getParVecVariations <- function(df) {
 #'   to the new normalization.
 #'
 #' @export
-#' 
+#'
 #' @family result modifiers
 #'
 #' @author Martijn van Noort
@@ -1798,7 +1798,7 @@ normalizeVariations <- function(df, parNorm = TRUE, outNorm = TRUE) {
                   paste0(setdiff(varnms, names(existParNorm))), " .\nExiting.\n"))
     return(NULL)
   }
-  
+
   # Perform normalization:
   nSecOrd <- 0  # nr of second order cases
   secOrd <- attr(df, secOrdAttr)
@@ -1822,7 +1822,7 @@ normalizeVariations <- function(df, parNorm = TRUE, outNorm = TRUE) {
   if (nSecOrd > 0 & nSecOrd != length(varnms)*(length(varnms)+1)/2) {
     processWarns("VariationalEq::normalizeVariations: unexpected number of second order derivatives.\nThis should not happen, but I will continue for now.\n")
   }
-  
+
   existOutNorm <- attr(df, outNormAttr)
   if ((existOutNorm && !outNorm) || (!existOutNorm && outNorm)) {
     nams <- c(paste0("dy_d", varnms), grep("^d2y_d", names(df), value = TRUE))  # Names of first and second order columns
@@ -1847,7 +1847,7 @@ normalizeVariations <- function(df, parNorm = TRUE, outNorm = TRUE) {
 #'   Function displays an error and returns \code{NULL} if the input is not in the specified format.
 #'
 #' @export
-#' 
+#'
 #' @family checkers
 #'
 #' @author Martijn van Noort
@@ -1887,7 +1887,7 @@ isNormalizedVariations <- function(df) {
 #'   In case of error, an error message is printed and the return value is \code{NULL}.
 #'
 #' @export
-#' 
+#'
 #' @family plotting and printing
 #'
 #' @author Martijn van Noort
@@ -1916,12 +1916,12 @@ plotVariations <- function(df, outNames = NULL, plotModel = TRUE, plotFirst = TR
     # Remove all columns containing an IIV parameter:
     grepstr <- paste0("_d?(", paste0(names(attr(df, etaAttr)), collapse = "|"), ")")
     varcols <- grep(grepstr, varcols, value = TRUE, invert = TRUE)
-  } 
+  }
   if (!plotRes && length(attr(df, epsAttr)) > 0) {
     # Remove all columns containing a residual parameter:
     grepstr <- paste0("_d?(", paste0(names(attr(df, epsAttr)), collapse = "|"), ")")
     varcols <- grep(grepstr, varcols, value = TRUE, invert = TRUE)
-  } 
+  }
   # Set to tall:
   dfTall <- reshape2::melt(data = df[, c("t", "output", varcols)], id.vars = c("t", "output"))
   pl <- ggplot2::ggplot(dfTall, mapping = aes(x = t, y = value, group = interaction(variable, output), color = output)) +
