@@ -6,7 +6,7 @@
 #          www.lapp.nl
 #          Archimedesweg 31
 #          2333 CM Leiden, The Netherlands
-# 
+#
 # This file is part of the parid package.
 # The parid package is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -20,7 +20,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with the parid package.
-# If not, see <https://www.gnu.org/licenses/>. 
+# If not, see <https://www.gnu.org/licenses/>.
 
 
 #--------------------------------------------------------------------------------------------------------
@@ -63,8 +63,8 @@
 #'   contains elements not in \code{names(theta)}, and likewise for \code{eta} and \code{eps}.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 calcVariationsNum <- function(model, p, init, output, times, theta, eta, eps,
                               vartheta, vareta, vareps, secOrd, ...) {
   # Create the complements of vartheta, vareta and vareps, and the corresponding parameter vectors:
@@ -75,7 +75,7 @@ calcVariationsNum <- function(model, p, init, output, times, theta, eta, eps,
   }
   # Now valtheta, valeta, valeps contain the parameters for which derivatives are to be computed;
   # and valthetac, valetac, valepsc contain the ones that stay fixed.
-  
+
   # Create the ODE and output function to be used in lsoda:
   fu <- function(t, y, p, eps) {
     c(list(model(t, y, p)), output(y, p, eps))
@@ -94,7 +94,7 @@ calcVariationsNum <- function(model, p, init, output, times, theta, eta, eps,
     if(inherits(out, "try-error")) return(NULL)
     return(out[out[, "time"] %in% times, (ncol(out)-nOutputs+1):ncol(out), drop = FALSE])
     # Keep the final nOutputs columns corresponding to the output, as a matrix.
-    
+
     # return(as.numeric(out[, (ncol(out)-nOutputs+1):ncol(out), drop = FALSE]))
     # # Keep the final nOutputs columns corresponding to the output, and list them as single vector. (As single vector is not needed.)
     # # Can go back to matrix form with 'matrix(vector, ncol = nOutputs)'.
@@ -140,8 +140,8 @@ calcVariationsNum <- function(model, p, init, output, times, theta, eta, eps,
 #' @return A copy of this environment.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 copyEnv <- function(env) {
   as.environment(as.list(env, all.names=TRUE))
 }
@@ -152,7 +152,7 @@ copyEnv <- function(env) {
 #'
 #' Creates second derivative codes from first derivative ones in lower triangular form, that is, codes are generated
 #' for derivatives (i,j) where i <= j.
-#' 
+#'
 #' @param firstDerivCodes    Vector of strings containing codes of first derivatives.
 #' @param sep                String defining the separator character(s) between the two derivatives in the output.
 #'   Default is ".".
@@ -162,14 +162,14 @@ copyEnv <- function(env) {
 #'   Returns \code{NULL} if there are none. This happens when \code{firstDerivCodes} is empty or NULL.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 createLowerTriSecondDerivCodes <- function(firstDerivCodes, sep = ".") {
     df <- expand.grid(j = seq_along(firstDerivCodes), i = seq_along(firstDerivCodes))
     df <- df[df[, "i"] <= df[, "j"], ]
     if (nrow(df) == 0) NULL else paste0(firstDerivCodes[df[, "i"]], sep, firstDerivCodes[df[, "j"]])
 }
-  
+
 
 #------------------------------------------ createDerivGreps ------------------------------------------
 #' Create grep strings for derivatives.
@@ -194,14 +194,14 @@ createLowerTriSecondDerivCodes <- function(firstDerivCodes, sep = ".") {
 #' @param typeSep       String specifying the character(s) separating the type and variable in elements of \code{derivCodes}.
 #' @param outnameSep    String specifying the character(s) separating the various parts of the derivative specification
 #'   in the names of the output.
-#'                      
+#'
 #' @return The grep strings, as a named vector of strings of the same length as derivCodes.
 #'   The names of its elements are \code{<varName><outnameSep><deriv1><outnameSep><deriv2>}, where the derivatives are
 #'   included as needed.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 createDerivGreps <- function(derivCodes, compNames, varName, derivSep = "\\.", typeSep = "_", outnameSep = "_") {
   splitCodes <- strsplit(derivCodes, split = derivSep)
   splitCodesNames <- unlist(lapply(splitCodes, function(splitCode) paste0(c(varName, gsub(paste0("^.*", typeSep), "", splitCode[-1])), collapse = "_")))
@@ -220,20 +220,20 @@ createDerivGreps <- function(derivCodes, compNames, varName, derivSep = "\\.", t
 
 #------------------------------------------ transformExpr ------------------------------------------
 #' Transform an expression by replacing variables by functions or vice versa
-#' 
+#'
 #' Transforms an expression (e.g. a function body) by replacing state variables by state functions or vice versa.
 #' The state variables are assumed to be of the form 'y[[<state>]]', where state is a unique identifier
 #' of the component, of the form '<Component>_<Deriv1>_<Deriv2>', where the component may be a name or a number,
 #' and the derivatives are optional.
-#' 
+#'
 #' @param expr     The expression to transform.
 #' @param pList    List of parameters to be used as function arguments. Each element is a language object.
-#' 
+#'
 #' @return The transformed expression.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 transformExpr <- function(expr, pList) {
   lpList <- length(pList)
   if (is.atomic(expr) || is.name(expr)) {
@@ -259,12 +259,12 @@ transformExpr <- function(expr, pList) {
     return(c("[", unlist(lapply(X = expr, FUN = transformExpr, pList = pList)), "]")) # Call transformExpr recursively for pairlists
   } else {
     # User supplied incorrect input
-    stop("Don't know how to handle type ", typeof(expr), 
+    stop("Don't know how to handle type ", typeof(expr),
          call. = FALSE)
   }
 }
 
-    
+
 #------------------------------------------ createDerivsSymb ------------------------------------------
 #' Generate derivatives of model components symbolically
 #'
@@ -278,7 +278,7 @@ transformExpr <- function(expr, pList) {
 #' @param init     Function(p) of parameters specifying the initial state (at time 0) of the model.
 #' @param output   Function(y, p, eps) of state variables, parameters and residual errors specifying the model outputs.
 #'   This function should return a numeric vector.
-#'   
+#'
 #' @param theta    Population parameter values, as named numeric vector. May be \code{NULL} if none are needed.
 #' @param eta      Individual parameter values, as named numeric vector. May be \code{NULL} if none are needed.
 #' @param eps      Residual parameter values, as named numeric vector. May be \code{NULL} if none are needed.
@@ -297,7 +297,7 @@ transformExpr <- function(expr, pList) {
 #'   The names of the elements have the format \code{p(_<deriv>(_<deriv>))}, where \code{<deriv>} codes the derivative and
 #'   is optional, as indicated by the brackets.
 #'   Each element has the same length as the output of the non-variational version of \code{p}, and its components have
-#'   the same names. 
+#'   the same names.
 #'   The output of \code{init} and \code{model} is a named numeric vector of values of the state variables and their
 #'   derivatives.
 #'   The names have the format \code{y(_<deriv>(_<deriv>)).<state>}, where \code{<deriv>} codes the derivative and
@@ -307,8 +307,8 @@ transformExpr <- function(expr, pList) {
 #'   is optional, and \code{<state>} codes the state or (if the state has no name) its index.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, vareta, vareps, secOrd) {
   # ---
   # Preliminaries.
@@ -334,7 +334,7 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
   if(length(vareta) > 0)   names(vareta)   <- rep("eta", length(vareta))
   if(length(vareps) > 0)   names(vareps)   <- rep("eps", length(vareps))
   varthetaeta     <- c(vartheta, vareta)
-  
+
   # ---
   # Create dp = function of (theta, eta) that contains the derivatives of p(theta, eta).
   if(is.null(varthetaeta)) {
@@ -354,7 +354,7 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
     dpNeutrVec <- rep(1, length(namps))
     parStr <- paste0(deparse(body(p)), collapse = "")
     dpare  <- Deriv::Deriv(parse(text = parStr), x = varthetaeta, nderiv = nderiv)
-    
+
     # Derivative of p:
     dp <- eval(substitute(function(theta, eta) {
       evalExpr <- unlist(eval(expr))
@@ -366,7 +366,7 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
       })
     }, list(nams = namps, dCodes = dpCodes, neutrVec = dpNeutrVec, expr = dpare)))
   }
-  
+
   # Select parameter names (from "p") that have nonzero derivatives. In model, init and output, only their derivatives are needed:
   nampsNonzeroDeriv <- namps[unlist(lapply(namps, function(namp) {
     any(unlist(lapply(dp(theta, eta)[-1], function(dpComp) {
@@ -375,7 +375,7 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
   }))]
   names(nampsNonzeroDeriv) <- rep("p", length(nampsNonzeroDeriv))
   if(length(nampsNonzeroDeriv) == 0) nampsNonzeroDeriv <- NULL
-  
+
   # ---
   # Create dmodel = function of (t, y, p) that contains the derivatives of the ODE's model(t, y, p).
   # Initialize mydrule which contains additional rules for derivation of state variables ("FU_"...) and pList which
@@ -440,7 +440,7 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
                        varName = "y")
     }  # grep strings for derivatives
     dmodelNeutrVec <- rep(1, length(namys))
-    
+
     # Derivative of model:
     dmodel <- eval(substitute(function(t, y, p) {
       evalExpr <- unlist(eval(expr))
@@ -453,7 +453,7 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
       return(out)
     }, list(nams = namys, dCodes = dmodelCodes, neutrVec = dmodelNeutrVec, expr = dmodele)))
   }
-  
+
   # ---
   # Create dinit = function of (p) that contains the derivatives of the initial value init(p).
   if(is.null(nampsNonzeroDeriv)) {
@@ -474,7 +474,7 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
                        compNames = if(iHasnames) namys else NULL,
                        varName = "y")
     }  # grep strings for derivatives
-    
+
     # Derivative of init:
     dinit <- eval(substitute(function(p) {
       evalExpr <- unlist(eval(expr))
@@ -487,7 +487,7 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
       return(out)
     }, list(nams = namys, dCodes = dinitCodes, neutrVec = dmodelNeutrVec, expr = dinite)))
   }
-  
+
   # ---
   # Create doutput = function of (y, p, eps) that contains the derivatives of the output function output(y, p, eps).
   if(is.null(nampsNonzeroDeriv) && is.null(vareps)) {
@@ -519,11 +519,11 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
                        varName = "y")
     }  # grep strings for derivatives
     doutputNeutrVec <- rep(1, length(namos))
-    
+
     # Derivative of output:
     doutput <- eval(substitute(function(y, p, eps) {
       evalExpr <- unlist(eval(expr))
-      # exprNams <- if(length(nams) <= 1) names(evalExpr) else stringr::str_sub(names(evalExpr), 1, -2)  # Take substring to remove index of output element; 
+      # exprNams <- if(length(nams) <= 1) names(evalExpr) else stringr::str_sub(names(evalExpr), 1, -2)  # Take substring to remove index of output element;
       out <- unlist(lapply(dCodes, function(dCode) {
         #      out1 <- evalExpr[grep(dCode, exprNams)] * neutrVec  # Multiply by neutrVec in case vector length was reduced to 1
         out1 <- evalExpr[grep(dCode, names(evalExpr))] * neutrVec  # Multiply by neutrVec in case vector length was reduced to 1
@@ -534,7 +534,7 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
       return(out)
     }, list(nams = namos, dCodes = doutputCodes, neutrVec = doutputNeutrVec, expr = doutpute)))
   }
-  
+
   # Return the functions defining the variational equations:
   return(list("model" = dmodel, "p" = dp, "init" = dinit, "output" = doutput))
 }
@@ -548,12 +548,12 @@ createDerivsSymb <- function(model, p, init, output, theta, eta, eps, vartheta, 
 #'
 #' @param df    data frame
 #' @param cols  vector of strings specifying columns to be extracted
-#' 
+#'
 #' @return A data frame containing the required columns
-#' 
+#'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 extractDf <- function(df, cols) {
   out <- as.data.frame(matrix(0, nrow = nrow(df), ncol = length(cols)))
   names(out) <- cols
@@ -589,12 +589,12 @@ extractDf <- function(df, cols) {
 #' @param secOrd   \code{TRUE} if second order derivatives have to be computed, \code{FALSE} if not.
 #'
 #' @return A vector with derivatives of order 0, 1, 2 of the state variables with respect to base parameters
-#'   (theta, eta and eps). The elements are named <nam>.<i>, where i is the sequence number of the component of y, 
+#'   (theta, eta and eps). The elements are named <nam>.<i>, where i is the sequence number of the component of y,
 #'   and nam is of the form 'y', 'dy_d<v1>' or 'd2y_d<v1>_<v2>'.
-#'   
+#'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 calcVarSymb <- function(doutput, dpout, vartheta, vareta, vareps, secOrd) {
   namos <- unique(unlist(lapply(names(doutput), function(nam) strsplit(nam, "_")[[1]][[1]])))  # Component names (or indices) of output variables, in non-variational context
   namps <- names(dpout[[1]])  # Names of derived parameters
@@ -609,7 +609,7 @@ calcVarSymb <- function(doutput, dpout, vartheta, vareta, vareps, secOrd) {
     rep(c("", dv, if(secOrd) dv2 else NULL), each = length(namos))
   }  # vector of strings containing the derivatives to be taken ("" for no derivative, "var" for first
   #    derivative in var, "var1_var2" for second derivative in var1 and var2).
-  
+
   # If second derivs, compute first and second derivs wrt derived parameters
   doutput1s <- if(secOrd) sapply(namos, simplify = FALSE, USE.NAMES = TRUE, function(namo) {
     # Note sapply names output by namos, in contrast to lapply which has no names.
@@ -624,7 +624,7 @@ calcVarSymb <- function(doutput, dpout, vartheta, vareta, vareps, secOrd) {
   # doutput2s contains the second derivatives d^2y/dp^2. It is a list with one element for each output in namos.
   # Each element is an array with dimension p times p times k, where p is the number of derived parameters
   # and k the number of time points. That is, for a fixed third index, this is the Hessian at that time point.
-  
+
   # Compute derivs wrt base params
   out <- mapply(derivCase = derivCases, namo = namos, SIMPLIFY = FALSE, function(derivCase, namo) {
     derivs  <- strsplit(derivCase, "_")[[1]]  # Derivatives are taken with respect to these base parameters (may be empty)
@@ -672,7 +672,7 @@ calcVarSymb <- function(doutput, dpout, vartheta, vareta, vareps, secOrd) {
 #' @param expr     An expression, for example a function body.
 #' @param out      Boolean vector storing the output indicators. Initialized to \code{FALSE} and this
 #'   should not be changed.
-#' 
+#'
 #' @return Boolean vector of the same format as \code{out}, where \code{TRUE} means the corresponding element
 #'   is present in \code{expr}, and \code{FALSE} means it is not.
 #'   The elements are \code{y.name}, \code{y.nr} and \code{y.comp} indicating whether the vector \code{y}
@@ -687,8 +687,8 @@ calcVarSymb <- function(doutput, dpout, vartheta, vareta, vareps, secOrd) {
 #'   then execution is stopped.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 analyzeBody <- function(expr, out = c(y.name = FALSE, y.nr = FALSE, y.comp = FALSE, y.vec = FALSE, y.brc = FALSE,
                                       p.name = FALSE, p.nr = FALSE, p.comp = FALSE, p.vec = FALSE, p.brc = FALSE,
                                       theta.name = FALSE, theta.nr = FALSE, theta.comp = FALSE, theta.vec = FALSE, theta.brc = FALSE,
@@ -700,7 +700,7 @@ analyzeBody <- function(expr, out = c(y.name = FALSE, y.nr = FALSE, y.comp = FAL
     # y or p appears as vector, i.e., without indexing:
     out[[paste0(as.character(expr), ".vec")]] <- TRUE
     return(out)
-  } 
+  }
   if (is.atomic(expr) || is.name(expr)) {
     # atomic or name other than y or p, so reached leaf of tree and nothing to change:
     return(out)
@@ -719,7 +719,7 @@ analyzeBody <- function(expr, out = c(y.name = FALSE, y.nr = FALSE, y.comp = FAL
       if(expr2 %in% varNames) {
         cls <- class(expr[[3]])         # index is character string or number or more complicated
         type <- if (cls == "character") "name" else if (cls == "numeric") "nr" else "comp"
-        out[[paste0(expr2, ".", type)]] <- TRUE 
+        out[[paste0(expr2, ".", type)]] <- TRUE
         return(out)
       }
     }
@@ -730,7 +730,7 @@ analyzeBody <- function(expr, out = c(y.name = FALSE, y.nr = FALSE, y.comp = FAL
       out[[fun]] <- TRUE
       return(out)
     }
-    
+
     # Otherwise, dig deeper
     outList <- lapply(X = expr, FUN = analyzeBody, out = out)  # Call analyzeBody recursively for other expressions
     return(Reduce("|", x = outList, init = out))
@@ -755,15 +755,15 @@ analyzeBody <- function(expr, out = c(y.name = FALSE, y.nr = FALSE, y.comp = FAL
 #' @param atTailHeadBlock Boolean vector storing whether this expression is at the tail of the function, i.e.,
 #'   whether it contains the return statement.
 #'   Initialized to \code{TRUE} and this should not be changed.
-#' 
+#'
 #' @return \code{TRUE} if \code{c} or \code{`:`} occur anywhere outside the return statement, and \code{FALSE}
 #'   if they only occur in the return value (or not at all).
 #'   If \code{expr} contains illegal components (anything other than a call, pairlist, atomic or name),
 #'   then the return value is \code{NA}. This should never happen.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 checkVectorUse <- function(expr, atTailHeadBlock = TRUE) {
   # atHeadFinalBlock indicates whether this expression is at the tail of the function, i.e., whether it contains the return statement. Should initialize to TRUE for function body.
   if (is.null(expr)) return(FALSE)        # Empty expression. This is ok
@@ -803,7 +803,7 @@ checkVectorUse <- function(expr, atTailHeadBlock = TRUE) {
 #------------------------------------------ checkModelDef ------------------------------------------
 #' Check formatting of model components for symbolic manipulation
 #'
-#' Checks whether model components (\code{model}, \code{p}, \code{init}, \code{output}) 
+#' Checks whether model components (\code{model}, \code{p}, \code{init}, \code{output})
 #' are formatted correctly for symbolic manipulation.
 #' The following checks are performed:
 #' * Each component has the correct formals.
@@ -830,20 +830,20 @@ checkVectorUse <- function(expr, atTailHeadBlock = TRUE) {
 #' @note \code{theta}, \code{eta} and \code{eps} are only used to generate some output values of the functions
 #'   \code{p} and \code{init}, so that their naming can be checked, and to check whether they have names or not.
 #'   Their specific values usually do not matter (but see next note).
-#' @note These checks are meant to catch the most common mistakes but are not completely failsafe. For example, 
+#' @note These checks are meant to catch the most common mistakes but are not completely failsafe. For example,
 #'   to check consistency in naming they determine if \code{p} and \code{init} provide named or unnamed return values for
 #'   the given \code{theta} and \code{eta}. This may fail to detect errors in case the naming depends on the parameter values.
 #'   Another example is that the validity or consistency of names or indices is not checked
 #'   (e.g., one model component may use different names than another, or indices can be negative).
-#' 
+#'
 #' @return \code{TRUE} if the model components pass all tests, \code{FALSE} if not.
 #'   In the latter case, error messages will be displayed.
 #'   All encountered errors are shown, but if the formals are incorrect, the other checks are not performed.
 #'   In the first case, warning messages may be displayed.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 checkModelDef <- function(model, p, init, output, theta, eta, eps, showWarn) {
   varNames <- c("y", "p", "theta", "eta", "eps")  # Variables to check indexing for.
   errors    <- c()
@@ -893,13 +893,13 @@ checkModelDef <- function(model, p, init, output, theta, eta, eps, showWarn) {
         warns <- c(warns, paste0("\targument '", elt, "' does not appear. Not an error, but you may want to double check.\n"))
       }
     }
-    
+
     # Check that function bodies do not contain vectorization (i.e., 'c()' or ':'), except possibly in the return value:
     vectorUse <- lapply(fus, function(fu) checkVectorUse(body(fu)))
     for (fu in names(vectorUse)) {
       if(vectorUse[[fu]]) errors <- c(errors, paste0("\tfunction '", fu, "' uses vectorization ('c()' or ':'). This may only be used in the return value.\n"))
     }
-    
+
     # Check names of output of "init" and "p" functions:
     selFus <- c("y" = "init", "p" = "p")
     hasOutNames <- {
@@ -971,8 +971,8 @@ checkModelDef <- function(model, p, init, output, theta, eta, eps, showWarn) {
 #' @return A character vector of names.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 getNamesInFunction <- function(fu) {
   out <- doGetNames(body(fu))
   sort(setdiff(out, ""))  # Remove empty names and duplicates
@@ -989,8 +989,8 @@ getNamesInFunction <- function(fu) {
 #' @return A character vector of names.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 doGetNames <- function(expr) {
   if (is.atomic(expr) || is.name(expr)) return(names(expr))  # Return names if atomic or name
   c(names(expr), unlist(lapply(expr, doGetNames)))           # Otherwise, search recursively
@@ -1007,8 +1007,8 @@ doGetNames <- function(expr) {
 #' @return A character vector of values.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 getRefsInFunction <- function(fu) {
   out <- doGetRefs(body(fu))
   sort(setdiff(out, ""))  # Remove empty referred names and duplicates
@@ -1025,8 +1025,8 @@ getRefsInFunction <- function(fu) {
 #' @return A character vector of names.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 doGetRefs <- function(expr) {
   # Return name if atomic character.
   if (is.atomic(expr)) return(if (is.character(expr)) as.character(expr) else NULL)
@@ -1047,8 +1047,8 @@ doGetRefs <- function(expr) {
 #'         The second is a character vector with modified names.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 createNewNamesRefs <- function(oldNames) {
   inds <- grep("[^[:alpha:]]$", oldNames)
   newNames <- oldNames
@@ -1075,8 +1075,8 @@ createNewNamesRefs <- function(oldNames) {
 #' @return The function \code{fu} with modified names.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 replaceNamesRefs <- function(fu, replace) {
   body(fu) <- doReplaceNamesRefs(body(fu), replace)
   fu
@@ -1095,8 +1095,8 @@ replaceNamesRefs <- function(fu, replace) {
 #' @return The expression \code{expr} with modified names.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 doReplaceNamesRefs <- function(expr, replace) {
   if (is.atomic(expr) || is.name(expr)) {
     if(!is.null(names(expr))) expr <- plyr::rename(expr, replace, warn_missing = FALSE)
@@ -1139,7 +1139,7 @@ doReplaceNamesRefs <- function(expr, replace) {
 #' @param vareps   Vector of names of residual parameters for which variations are to be calculated.
 #'   Should be a subset of \code{names(eps)}, or \code{NULL} for none.
 #' @param secOrd   \code{TRUE} if second order derivatives have to be computed, \code{FALSE} if not.
-#' @param chkModel \code{TRUE} if it has to be checked whether model components (\code{model}, \code{p}, \code{init}, \code{output}) 
+#' @param chkModel \code{TRUE} if it has to be checked whether model components (\code{model}, \code{p}, \code{init}, \code{output})
 #'                 are formatted correctly for symbolic manipulation, \code{FALSE} if not.
 #' @param showWarn \code{TRUE} if warnings about missing random parameters are to be shown, \code{FALSE} if not.
 #'                 The latter is of use in case only the structural model is of interest.
@@ -1155,8 +1155,8 @@ doReplaceNamesRefs <- function(expr, replace) {
 #'   or if integration of the model fails.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 calcVariationsSymb <- function(model, p, init, output, times, theta, eta, eps,
                                vartheta, vareta, vareps, secOrd, chkModel, showWarn, ...) {
   if (chkModel) {
@@ -1187,7 +1187,7 @@ calcVariationsSymb <- function(model, p, init, output, times, theta, eta, eps,
   # Find parameter values, and times:
   parms <- pmdf(thetamdf, etamdf)
   xTimes <- sort(unique(c(0, times)))
-  
+
   # Create variational function to integrate:
   dfu <- createDerivsSymb(modelmdf, pmdf, initmdf, outputmdf, thetamdf, etamdf, epsmdf,
                           varthetamdf, varetamdf, varepsmdf, secOrd)
@@ -1195,12 +1195,12 @@ calcVariationsSymb <- function(model, p, init, output, times, theta, eta, eps,
   fu <- function(t, y, p, eps) {
     c(list(dfu[["model"]](t, y, p)), dfu[["output"]](y, p, eps))
   }
-  
+
   # Integrate variational ODE:
   out <- try(deSolve::lsoda(y = dfu[["init"]](parms), times = xTimes, func = fu, parms = parms, eps = epsmdf, ...))
   if(inherits(out, "try-error")) return(NULL)
   out <- as.data.frame(out[out[, "time"] %in% times, c(1, (ncol(out)-nOutputs+1):ncol(out)), drop = FALSE])
-  
+
   out <- calcVarSymb(out[, -1], dfu[["p"]](thetamdf, etamdf), varthetamdf, varetamdf, varepsmdf, secOrd) # Change to derivs of base parameters (theta, eta, eps)
   colnames <- gsub("\\..*?$", "", names(out))
   colnames <- colnames[!duplicated(colnames)]
@@ -1208,7 +1208,7 @@ calcVariationsSymb <- function(model, p, init, output, times, theta, eta, eps,
   out[, "i"] <- as.numeric(gsub("^.*\\.", "", out[, "variable"]))
   out[, "var"] <- gsub("\\..*?$", "", out[, "variable"])
   out <- reshape2::dcast(out, t+i ~ var, value.var = "value")[, c("t", "i", colnames)]  # Back to wide format
-  
+
   # Revert variable names back to their original values:
   for (ind in inds) {
     colnames(out) <- gsub(paste0("^dy_d\\Q", newNames[[ind]], "\\E$"),
@@ -1221,7 +1221,7 @@ calcVariationsSymb <- function(model, p, init, output, times, theta, eta, eps,
                           paste0("d2y_d\\1_", oldNames[[ind]]),
                           colnames(out))
   }
-  
+
   return(out)
 }
 
@@ -1247,8 +1247,8 @@ calcVariationsSymb <- function(model, p, init, output, times, theta, eta, eps,
 #'   and an error message or list of error messages if not.
 #'
 #' @author Martijn van Noort
-#' 
-#' @noRd 
+#'
+#' @noRd
 isValidVariations <- function(df, nmdf = "input 'df'") {
   out <- NULL
   if(!"keepattr" %in% class(df)) {
@@ -1336,7 +1336,7 @@ isValidVariations <- function(df, nmdf = "input 'df'") {
 #'   By default equal to \code{names(eps)}.
 #' @param secOrd      \code{TRUE} if second order derivatives have to be computed, \code{FALSE} (default) if not.
 #' @param symbolic    \code{TRUE} (default) if derivatives are to be computed symbolically, \code{FALSE} if numerically.
-#' @param chkModel    \code{TRUE} (default) if it has to be checked whether model components (\code{model}, \code{p}, \code{init}, \code{output}) 
+#' @param chkModel    \code{TRUE} (default) if it has to be checked whether model components (\code{model}, \code{p}, \code{init}, \code{output})
 #'   are formatted correctly for symbolic manipulation, \code{FALSE} if not.
 #' @param showWarn    \code{TRUE} (default) if warnings about missing random parameters are to be shown, \code{FALSE} if not.
 #'   The latter is of use in case only the structural model is of interest.
@@ -1366,7 +1366,7 @@ isValidVariations <- function(df, nmdf = "input 'df'") {
 #'   The first method tends to give more stable results, and hence is set as default.
 #'   It is not clear how the complexities of these methods compare. The first requires solving a system of differential
 #'   equations of higher dimension, while the second requires multiple solutions to the original system (of lower dimension).
-#' 
+#'
 #' @note It is recommended to use symbolic derivation (\code{symbolic==TRUE}) rather than numerical derivation,
 #'   as it is more accurate, especially for derivatives that are formally zero.
 #'   In numerical calculation, their value may be estimated as close to zero rather than exactly zero,
@@ -1393,10 +1393,10 @@ isValidVariations <- function(df, nmdf = "input 'df'") {
 #'     Likewise for components of the parameter vectors.
 #'   * Do not define any functions with names starting with "FU_". These are used internally to represent state
 #'     variables and therefore may not be used for other purposes.
-#' 
+#'
 #' @note The functions \code{model}, \code{p}, \code{init} and \code{output} should satisfy the rules imposed by
 #'   \code{\link[deSolve]{lsoda}}, where \code{output} corresponds to the additional output of the \code{lsoda} function \code{func}.
-#' 
+#'
 #' @note If this function is used for sensitivity or aliasing calculations, then individual and random parameters are not used,
 #'   so the function \code{p} and \code{output} may ignore these inputs, and \code{eta} and \code{eps} may be set to \code{NULL}.
 #'   Furthermore, in this case \code{secOrd = FALSE}. See \code{\link{calcFirstVariations}}.
@@ -1406,7 +1406,7 @@ isValidVariations <- function(df, nmdf = "input 'df'") {
 #'   See \code{\link{calcVariationsFim}}.
 #'
 #' @export
-#' 
+#'
 #' @family calculation functions
 #'
 #' @author Martijn van Noort
@@ -1475,7 +1475,7 @@ calcVariations <- function(model, p, init, output, times, theta, eta, eps,
 #'   By default equal to \code{names(parms)}.
 #' @param symbolic    \code{TRUE} (default) if derivatives are to be computed symbolically, \code{FALSE} if numerically.
 #'   See \code{\link{calcVariations}} for details.
-#' @param chkModel    \code{TRUE} (default) if it has to be checked whether model components (\code{model}, \code{parms}, \code{init}, \code{outputPred}) 
+#' @param chkModel    \code{TRUE} (default) if it has to be checked whether model components (\code{model}, \code{parms}, \code{init}, \code{outputPred})
 #'   are formatted correctly for symbolic manipulation, \code{FALSE} if not.
 #' @param ...         Named arguments to be passed to \code{\link[deSolve]{lsoda}}.
 #'   Can be used for example to pass events or error tolerances.
@@ -1498,9 +1498,9 @@ calcVariations <- function(model, p, init, output, times, theta, eta, eps,
 #' @note It is recommended to use symbolic derivation (\code{symbolic==TRUE}) rather than numerical derivation,
 #'   as it is more accurate, especially for derivatives that are formally zero.
 #'   See \code{\link{calcVariations}} for details.
-#' 
+#'
 #' @export
-#' 
+#'
 #' @family calculation functions
 #'
 #' @author Martijn van Noort
@@ -1511,7 +1511,7 @@ calcFirstVariations <- function(model, parms, init, outputPred, times, varp = na
     thetaComps <- names(parms)
     thetaNames <- TRUE
     if (is.null(thetaComps)) {
-      thetaComps <- seq_along(theta) 
+      thetaComps <- seq_along(theta)
       thetaNames <- FALSE
     }
     # thetaComps contains names or indices of theta components
@@ -1570,7 +1570,7 @@ calcFirstVariations <- function(model, parms, init, outputPred, times, varp = na
 #'   By default equal to \code{nmeps}.
 #' @param symbolic    \code{TRUE} (default) if derivatives are to be computed symbolically, \code{FALSE} if numerically.
 #'   See \code{\link{calcVariations}} for details.
-#' @param chkModel    \code{TRUE} (default) if it has to be checked whether model components (\code{model}, \code{p}, \code{init}, \code{output}) 
+#' @param chkModel    \code{TRUE} (default) if it has to be checked whether model components (\code{model}, \code{p}, \code{init}, \code{output})
 #'   are formatted correctly for symbolic manipulation, \code{FALSE} if not.
 #' @param ...         Named arguments to be passed to \code{\link[deSolve]{lsoda}}.
 #'   Can be used for example to pass events or error tolerances.
